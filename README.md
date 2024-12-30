@@ -1,1 +1,0 @@
-# Open-Password-Manager
