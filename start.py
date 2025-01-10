@@ -1,20 +1,53 @@
-import flet as ft, sqlite3 as sq
-import os, logging, bd, guiLib as gLib, hashlib, cryptoLib, pywin32_system32
-
-from cryptography import fernet
-
+import flet as ft, sqlite3 as sq, guiLib as gLib
+import main, time, config, logging, datetime
+import os, logging, bd, hashlib, Lib, pywin32_system32
 
 
-logging.basicConfig(level=logging.INFO, filename="\SoftLog.txt", filemode="w")
+
+logging.basicConfig(level=logging.INFO, filename="userErrorLog.log", filemode="w")
 
 
 def start(page: ft.Page):
 
     def unBlockSoft(self):
 
-        #userKey=mainKeyField.content.value
+        master_password=mainKeyField.controls[0].value
 
-        pass
+
+        try:
+
+            with open ("information.txt", "r") as file:
+
+                encryptionKey_file=file.readline()
+
+                key_file=Lib.deecrypt(encryptionKey_file.encode())
+
+                if(key_file==master_password):
+
+                    main.main_menu(page)
+                        
+                else:
+
+                    mainKeyField.controls[0].border_color=ft.colors.RED
+
+                    page.update()
+
+                    time.sleep(1.0)
+
+                    mainKeyField.controls[0].border_color="#C1C2CF"
+
+                    page.update()
+
+                
+                file.close()
+
+        except Exception as ex:
+
+            logging.error(f"[{datetime.datetime.now()}] :: Connection to database was not succussful, REASON: {ex}")
+
+        
+
+        
 
     try:
 
@@ -24,7 +57,7 @@ def start(page: ft.Page):
 
         page.horizontal_alignment=ft.CrossAxisAlignment.CENTER
 
-        page.fonts={"Kufam":"Fonts\\Kufam.ttf"}
+        page.fonts={"Kufam":"Fonts\\Kufam.ttf", "Kufam_SemiBold": "Fonts\\Kufam-SemiBold.ttf"}
 
         page.bgcolor="#E4E6F3"
         page.window_height=670
@@ -36,7 +69,7 @@ def start(page: ft.Page):
         mainSoftName=ft.Row(controls=[
 
             ft.Image("Icons\\Logo.png", width=226, height=226,color=ft.colors.BLACK),
-            ft.Text("Open Password Manager", size=35, color=ft.colors.BLACK)], 
+            ft.Text("Open Password Manager", size=35, color=ft.colors.BLACK, font_family="Kufam_SemiBold")], 
             
             alignment=ft.MainAxisAlignment.CENTER)
 
@@ -58,7 +91,7 @@ def start(page: ft.Page):
 
     except Exception as ex:
 
-        logging.error(f"[ERROR]: {ex}")
+        logging.error(f"[{datetime.datetime.now()}] :: Connection to database was not succussful, REASON: {ex}")
 
 
 
@@ -70,7 +103,7 @@ def startWithoutPass(page: ft.Page):\
     page.horizontal_alignment=ft.CrossAxisAlignment.CENTER
     page.vertical_alignment=ft.MainAxisAlignment.CENTER
 
-    page.fonts={"Kufam":"Fonts\\Kufam.ttf"}
+    page.fonts={"Kufam":"Fonts\\Kufam.ttf", "Kufam_SemiBold": "Fonts\\Kufam-SemiBold.ttf"}
 
     page.bgcolor="#E4E6F3"
     page.window_height=670
@@ -85,20 +118,40 @@ def startWithoutPass(page: ft.Page):\
 
             if (self.control.text=="Сгенерировать пароль"):
 
-                cryptoLib.createMPassword(self)
+                mPassword, token=Lib.createMPassword(self)
 
-                with open ("information")
+                self.page.controls[0].controls[1].content.controls[2].value=mPassword
+
+                self.control.text="Создать хранилище"
+
+                self.page.update()
+
+                
 
             else:
 
                 master_password=createPassTheme.controls[1].content.controls[2].value
+                
+                cryptoKey,token=Lib.encryption(master_password,True)
+
+                with open ("information.txt", "w") as file:
+
+                    file.writelines(str(cryptoKey))
+
+                    file.writelines("\n"+str(token))
+
+                    file.close()
+
+                
+
+                main.main_menu(page)
 
                 
 
 
         def changeButtonText(self):
 
-            if (createPassTheme.controls[1][2].label==""):
+            if (createPassTheme.controls[1].content.controls[2].value==""):
 
                 enterGenPassw.text="Сгенерировать пароль"
 
@@ -107,7 +160,7 @@ def startWithoutPass(page: ft.Page):\
                 enterGenPassw.text="Создать хранилище"
 
             
-            self.page.update()
+            page.update()
 
 
 
@@ -118,7 +171,7 @@ def startWithoutPass(page: ft.Page):\
             ft.Image("Image\createPassLogo.svg", width=200, height=300),
             ft.Container(content=ft.Column(controls=[ft.Text("Создание хранилища",size=40,font_family="Kufam", color=ft.colors.BLACK),
                                                      ft.Text("Мастер-пароль является единственным ключом, который способен открыть ваше хранилище\nпаролей и осуществить расшивровку данных. В случае, если данный пароль будет утерян - мы не сможем его\nвосстановить.\n\nПри создании мастер-пароля для хранилища, рукомедуется использовать различные символы (@, %,!, & #), в\nсочетании с буквами и цифрами", size=14,color=ft.colors.BLACK),
-                                                     ft.TextField(ft.TextField(label="Мастер-пароль", hint_text="Введите мастер-пароль",width=350, border_color="#C1C2CF",on_focus=gLib.focusField, max_lines=1, on_blur=gLib.blurField, on_change=changeButtonText ,password=True,can_reveal_password=True ,text_style=ft.TextStyle(color="C1C2CF")))
+                                                     ft.TextField(label="Мастер-пароль", hint_text="Введите мастер-пароль",width=350, border_color="#C1C2CF",on_focus=gLib.focusField, max_lines=1, on_blur=gLib.blurField, on_change=changeButtonText ,password=True,can_reveal_password=True ,hover_color=ft.colors.BLACK)
                                                      ], spacing=20), on_hover=gLib.focusField)], 
             
             alignment=ft.MainAxisAlignment.CENTER, spacing=70, vertical_alignment=ft.CrossAxisAlignment.CENTER)
@@ -127,6 +180,7 @@ def startWithoutPass(page: ft.Page):\
 
         page.add(createPassTheme,enterGenPassw)
 
+        page.controls[0].controls[1].content.controls[2].value=""
 
         page.update()
     
@@ -139,7 +193,7 @@ def startWithoutPass(page: ft.Page):\
         mainSoftName=ft.Row(controls=[
 
             ft.Image("Icons\\Logo.png", width=226, height=226,color=ft.colors.BLACK),
-            ft.Text("Open Password Manager", size=35, color=ft.colors.BLACK)], 
+            ft.Text("Open Password Manager", size=35, color=ft.colors.BLACK, font_family="Kufam_SemiBold")], 
             
             alignment=ft.MainAxisAlignment.CENTER, spacing=5)
 
@@ -160,7 +214,7 @@ def startWithoutPass(page: ft.Page):\
 
 if __name__=="__main__":
 
-    if (os.path.exists("Config\\masterpassword.ini")==True):
+    if (os.path.exists("information.txt")==True):
 
         ft.app(target=start)
 

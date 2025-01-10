@@ -28,7 +28,7 @@ def main_menu(page:ft.Page):
             ft.NavigationDestination(label="Все записи", icon=ft.icons.NOTES, selected_icon=ft.Icons.NOTES_ROUNDED), 
             ft.NavigationDestination(label="\tАккаунты", icon=ft.icons.ACCOUNT_TREE_OUTLINED,selected_icon=ft.Icons.ACCOUNT_TREE_ROUNDED),
             ft.NavigationDestination(label="Банковские данные", icon=ft.icons.CREDIT_CARD_OUTLINED, selected_icon=ft.icons.CREDIT_CARD_ROUNDED),
-            ft.NavigationDestination(label="Документы", icon=ft.icons.NOTE_SHARP)])
+            ft.NavigationDestination(label="Заметки", icon=ft.icons.NOTE_SHARP)])
         
             ]),
         
@@ -50,9 +50,9 @@ def main_menu(page:ft.Page):
                                                 ft.Image("Icons\chevron-down.svg", width=27, height=27,color=ft.colors.WHITE)
                                                 
                                                 ], width=150, alignment=ft.MainAxisAlignment.START), items=[
-                                                    ft.PopupMenuItem("Аккауент",data="Account"),
+                                                    ft.PopupMenuItem("Аккаунт",data="Account", on_click=gLib.createWebAccountData),
                                                     ft.PopupMenuItem("Банковские данные",data="Bank Data"),
-                                                    ft.PopupMenuItem("Документы",data="Docs")
+                                                    ft.PopupMenuItem("Заметки",data="Notes")
                                                 ], shadow_color=ft.colors.BLACK, bgcolor="#B0ADAD", padding=0),
 
                                         ], width=1050, height=100), width=1050, height=100, bgcolor="#D9D9D9"),
@@ -70,6 +70,7 @@ def main_menu(page:ft.Page):
     #ft.Column([mainElementContainer], height=750, width=1200,alignment=ft.MainAxisAlignment.CENTER, horizontal_alignment=ft.CrossAxisAlignment.START)
 
     page.update()
+
 
 
 
