@@ -1,4 +1,4 @@
-import string,config,os,flet as ft, typing, logging, datetime
+import string,config,os,flet as ft, typing, logging, datetime,bd
 
 from random import randint
 from cryptography.fernet import Fernet
@@ -56,7 +56,7 @@ def createMPassword(self):
 
 
 
-def encryption(data: str, Initialization_Fernet_Token:bool) -> bytes:
+def encryption(data: str, Initialization_Fernet_Token:bool=False) -> bytes:
     
     """
     data: string data for encryption
@@ -98,17 +98,198 @@ def deecrypt(data: bytes)->str:
 
 
 
+def updateUserCardList(obj, cardList: ft.ListView):
+
+    if (obj.data=="0"):
+
+        cardList.controls.clear()
+        cardList.controls.append(ft.Row([]))
+
+        result=bd.reqExecute("Select * from Accounts")
+
+        countElementIndex=0
+
+        totalDict={'Login': "", 'Password': "", "Service Name": ""}
+
+        for i in range (0,len(result)):
+
+            if (countElementIndex<=3):
+
+
+                
+                totalDict["Login"]=deecrypt(result[i][1].encode())
+                totalDict["Password"]=deecrypt(result[i][2].encode())
+                totalDict["Service Name"]=deecrypt(result[i][3].encode())
+
+                userCard=createUserCard('web', totalDict)
+
+                cardList.controls[i].controls.append(userCard)
+
+            else:
+
+                cardList.controls.append(ft.Row())
+                
+                countElementIndex=0
+
+
+        result=bd.reqExecute("Select * from Bank_Accounts")
+
+        countElementIndex=0
+
+        totalDict={'Number': "", 'Date': "", "CVC": "", 'Bank Name': "", 'Bank URL': ""}
+
+        for i in range (0,len(result)):
+
+            if (countElementIndex<=3):
+
+                totalDict["Number"]=deecrypt(result[i][1].encode())
+                totalDict["Date"]=deecrypt(result[i][2].encode())
+                totalDict["CVC"]=deecrypt(result[i][3].encode())
+                totalDict["Bank Name"]=deecrypt(result[i][4].encode())
+                totalDict["Bank URL"]=deecrypt(result[i][5].encode())
+
+                userCard=createUserCard('bank', totalDict)
+
+                cardList.controls[i].controls.append(userCard)
+
+            else:
+
+                cardList.controls.append(ft.Row())
+                
+                countElementIndex=0
+
+        
+        result=bd.reqExecute("Select * from Documents")
+
+        countElementIndex=0
+
+        totalDict={'Filename': "", 'Format': "", "FileData": ""}
+
+        for i in range (0,len(result)):
+
+            if (countElementIndex<=3):
+
+                totalDict["Filename"]=deecrypt(result[i][1].encode())
+                totalDict["Format"]=deecrypt(result[i][2].encode())
+                totalDict["FileData"]=deecrypt(result[i][3].encode())
+
+                userCard=createUserCard('note', totalDict)
+
+                cardList.controls[i].controls.append(userCard)
+
+            else:
+
+                cardList.controls.append(ft.Row())
+                
+                countElementIndex=0
+
+
+    elif (obj.data=="1"):
+
+        cardList.controls.clear()
+        cardList.controls.append(ft.Row([]))
+
+        result=bd.reqExecute("Select * from Web_Accounts")
+
+        countElementIndex=0
+
+        totalDict={'Login': "", 'Password': "", "Service Name": ""}
+
+        for i in range (0,len(result)):
+
+            if (countElementIndex<=3):
+
+                totalDict["Login"]=deecrypt(result[i][1].encode())
+                totalDict["Password"]=deecrypt(result[i][2].encode())
+                totalDict["Service Name"]=deecrypt(result[i][3].encode())
+
+                userCard=createUserCard('web', totalDict)
+
+                cardList.controls[i].controls.append(userCard)
+
+            else:
+
+                cardList.controls.append(ft.Row())
+                
+                countElementIndex=0
+
+
+    elif (obj.data=="2"):
+
+        result=bd.reqExecute("Select * from Bank_Accounts")
+
+        cardList.controls.clear()
+        cardList.controls.append(ft.Row([]))
+
+        countElementIndex=0
+
+        totalDict={'Number': "", 'Date': "", "CVC": "", 'Bank Name': "", 'Bank URL': ""}
+
+        for i in range (0,len(result)):
+
+            if (countElementIndex<=3):
+
+                totalDict["Number"]=deecrypt(result[i][1].encode())
+                totalDict["Date"]=deecrypt(result[i][2].encode())
+                totalDict["CVC"]=deecrypt(result[i][3].encode())
+                totalDict["Bank Name"]=deecrypt(result[i][4].encode())
+                totalDict["Bank URL"]=deecrypt(result[i][5].encode())
+
+                userCard=createUserCard('bank', totalDict)
+
+                cardList.controls[i].controls.append(userCard)
+
+            else:
+
+                cardList.controls.append(ft.Row())
+                
+                countElementIndex=0
+
+
+    elif (obj.data=="3"):
+
+        result=bd.reqExecute("Select * from Documents")
+
+        cardList.controls.clear()
+        cardList.controls.append(ft.Row([]))
+
+        countElementIndex=0
+
+        totalDict={'Filename': "", 'Format': "", "FileData": ""}
+
+        for i in range (0,len(result)):
+
+            if (countElementIndex<=3):
+
+                totalDict["Filename"]=deecrypt(result[i][1].encode())
+                totalDict["Format"]=deecrypt(result[i][2].encode())
+                totalDict["FileData"]=deecrypt(result[i][3].encode())
+
+                userCard=createUserCard('note', totalDict)
+
+                cardList.controls[i].controls.append(userCard)
+
+            else:
+
+                cardList.controls.append(ft.Row())
+                
+                countElementIndex=0
+
+    obj.page.update()
+
+
+
 
 def createUserCard(type: str, data: dict[str,typing.Any]) -> ft.Card:
 
     """
-    type: One of type data in app ('web', 'bank', 'doc')
+    type: One of type data in app ('web', 'bank', 'note')
     
     data: 
         
         - If data type 'web': dict should consist of these key like {'Login', 'Password', 'Service Name' (URL)}
         - If  data type 'bank': should consist of these key like {'Number', 'Date', 'CVC', 'Bank Name', 'Bank URL'}
-        - If  data type 'doc': should consist of these key like {'Filename', 'Format', 'Photo'(In Bytes), 'PageCount' (if file is PDF, PPTX, DOCX)}
+        - If  data type 'note': should consist of these key like {'Filename', 'Format', 'FileData'}
     """
 
     if (type.lower()=='web'):
@@ -116,8 +297,8 @@ def createUserCard(type: str, data: dict[str,typing.Any]) -> ft.Card:
         if ("Login" in data.keys() and "Password" in data.keys() and "Service Name" in data.keys()):
 
             login=data['Login']
-            password=data['Password']
-            serviceName=""
+            password=""
+            serviceName=data['Service Name']
 
             if (data['Service Name'] in "www."):
 
@@ -128,9 +309,9 @@ def createUserCard(type: str, data: dict[str,typing.Any]) -> ft.Card:
 
                 serviceName=serviceName.split(serviceName)[0]
 
-            for i in range(0, len(password)):
+            for i in range(0, len(data['Password'])):
 
-                password[i]="•"
+                password+="•"
 
                                                 
             return ft.Card(content=
@@ -139,7 +320,7 @@ def createUserCard(type: str, data: dict[str,typing.Any]) -> ft.Card:
                     
                     ft.Row(width=270, height=40, controls=[
                                                                                                                 
-                        ft.CupertinoListTile(title=ft.Text(data, color=ft.colors.BLACK), subtitle=ft.Text(serviceName, color=ft.colors.BLACK, size=14), leading=ft.Image("Icons\\userCardLogo.ico"), width=210, padding=0),
+                        ft.CupertinoListTile(title=ft.Text(serviceName, color=ft.colors.BLACK), subtitle=ft.Text(data['Service Name'], color=ft.colors.BLACK, size=14), leading=ft.Image("Icons\\userCardLogo.ico"), width=210, padding=0),
                                                                 
                         ft.Column([
                                                                     
@@ -326,13 +507,11 @@ def createUserCard(type: str, data: dict[str,typing.Any]) -> ft.Card:
 
                         #ft.Text(""),
                                                                                             
-                        ft.Container(content=
-                                                                            
-                            ft.Text(value=ft.Markdown(value="asd").value,size=13,color=ft.colors.BLACK, selectable=True).value, width=210, height=140, padding=0, bgcolor=ft.colors.TRANSPARENT
+                        ft.Container(content=data["FileData"], width=210, height=160, padding=0, bgcolor=ft.colors.TRANSPARENT
                             
                             ),
 
-                        ft.Row([ft.IconButton(ft.icons.COPY, icon_size=24, icon_color=ft.colors.BLACK, padding=0, data="asd")], alignment=ft.MainAxisAlignment.CENTER)
+                        ft.Row([ft.IconButton(ft.icons.COPY, icon_size=24, icon_color=ft.colors.BLACK, padding=0, data=data["FileData"])], alignment=ft.MainAxisAlignment.CENTER)
 
                                                                                                                 
                         ], horizontal_alignment=ft.CrossAxisAlignment.START), color="#D9D9D9", shadow_color=ft.colors.BLACK,shape=ft.RoundedRectangleBorder(14)

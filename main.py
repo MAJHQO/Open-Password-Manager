@@ -5,6 +5,14 @@ import os, logging, bd, guiLib as gLib, hashlib, Lib, pywin32_system32
 
 def main_menu(page:ft.Page):
 
+    def pageChange(self):
+
+        Lib.updateUserCardList(self, cardListView)
+
+
+
+
+
     page.clean()
 
     page.title="Open Password Manager"
@@ -15,6 +23,9 @@ def main_menu(page:ft.Page):
     page.bgcolor="#E4E6F3"
     page.window_height=680
     page.window_width=1312
+
+
+    cardListView=ft.ListView(controls=[ft.Row([])], expand=1)
 
 
     leftElementContainer=ft.Container(content=ft.Column([
@@ -28,7 +39,7 @@ def main_menu(page:ft.Page):
             ft.NavigationDestination(label="Все записи", icon=ft.icons.NOTES, selected_icon=ft.Icons.NOTES_ROUNDED), 
             ft.NavigationDestination(label="\tАккаунты", icon=ft.icons.ACCOUNT_TREE_OUTLINED,selected_icon=ft.Icons.ACCOUNT_TREE_ROUNDED),
             ft.NavigationDestination(label="Банковские данные", icon=ft.icons.CREDIT_CARD_OUTLINED, selected_icon=ft.icons.CREDIT_CARD_ROUNDED),
-            ft.NavigationDestination(label="Заметки", icon=ft.icons.NOTE_SHARP)])
+            ft.NavigationDestination(label="Заметки", icon=ft.icons.NOTE_SHARP)], on_change=pageChange)
         
             ]),
         
@@ -42,7 +53,7 @@ def main_menu(page:ft.Page):
 
                                             ft.Text(" Главная", size=23, color=ft.colors.BLACK, font_family="Kufam_SemiBold"),
                                         
-                                        #Заменить данную кнопку на PopupMenuButton
+                                        
                                             ft.PopupMenuButton(content=ft.Row([
 
                                                 ft.Image("Icons\plus.svg", color=ft.colors.WHITE, width=27,height=27), 
@@ -51,11 +62,15 @@ def main_menu(page:ft.Page):
                                                 
                                                 ], width=150, alignment=ft.MainAxisAlignment.START), items=[
                                                     ft.PopupMenuItem("Аккаунт",data="Account", on_click=gLib.createWebAccountData),
-                                                    ft.PopupMenuItem("Банковские данные",data="Bank Data"),
-                                                    ft.PopupMenuItem("Заметки",data="Notes")
+                                                    ft.PopupMenuItem("Банковские данные",data="Bank Data", on_click=gLib.createBankAccountData),
+                                                    ft.PopupMenuItem("Заметки",data="Notes", on_click=gLib.addNoteData)
                                                 ], shadow_color=ft.colors.BLACK, bgcolor="#B0ADAD", padding=0),
 
                                         ], width=1050, height=100), width=1050, height=100, bgcolor="#D9D9D9"),
+
+
+                                        ft.Container(content=cardListView, width=1050, height=550, bgcolor=ft.colors.TRANSPARENT)
+                                        
 
 
                                         ]), bgcolor=ft.colors.TRANSPARENT, height=500,width=1050
@@ -63,7 +78,7 @@ def main_menu(page:ft.Page):
     )
     
     
-    mainElementContainer=ft.Container(content=ft.Row(),bgcolor=ft.colors.RED, width=650, height=500, alignment=ft.Alignment(0.6,0.4),padding=0)
+    #mainElementContainer=ft.Container(content=ft.Row(),bgcolor=ft.colors.RED, width=650, height=500, alignment=ft.Alignment(0.6,0.4),padding=0)
 
     page.add(ft.Row([leftElementContainer, ft.Text("", width=5), topElementContainer], spacing=0, vertical_alignment=ft.CrossAxisAlignment.START))
 
@@ -73,5 +88,6 @@ def main_menu(page:ft.Page):
 
 
 
+def account_menu(page: ft.Page):
 
-ft.app(main_menu)
+    pass

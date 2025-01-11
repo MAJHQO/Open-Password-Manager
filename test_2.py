@@ -1,161 +1,97 @@
-import flet as ft
+import flet as ft, time, Lib, bd, os, shutil, datetime
 
+from start import logging
 
-def test(page:ft.Page):
+from flet import FilePickerResultEvent, FilePicker
 
-    def clickButton(self):
-
-        self.open(webAccount_Add)
-
-        self.update()
-
-    def dialogClose(dialog: ft.AlertDialog, page: ft.Page):
+def addNoteData(self):
        
-       page.close_dialog(dialog)
+        def dialogClose(self):
+               
+               self.page.close_dialog()
+               
+               self.page.window_height=680
 
-       page.update()
-
-
-    def saveUserData(self):
-
-        serviceURL=""
-        login=""
-        password=""
-
-        if (self.page.controls[0].content.controls[0].controls[1].value!=None):
-
-            serviceURL=self.page.controls[0].content.controls[0].controls[1].value
-
-        else:
-
-            self.page.controls[0].content.controls[0].controls[1].border_color=ft.colors.RED
+               self.page.update()
 
         
-        if (self.page.controls[0].content.controls[2].content.controls[2].controls[3].value != None):
+        def selectNoteFile(me: FilePickerResultEvent):
+               
+                noteFile["Path"]=me.files[0].path
+                noteFile["SelectedFile"]=me.files[0].name
 
-            login=self.page.controls[0].content.controls[2].content.controls[2].controls[3].value
+                addNoteFile.content.controls[0].content.controls[2].value=f"Файл '{noteFile["SelectedFile"]}' успешно выбран\n\nНе забудьте удалить выбранный файл, с целью безопасности хранения текущего"
+                addNoteFile.content.controls[0].content.controls[2].text_align=ft.TextAlign.CENTER
+                
+                addNoteFile.content.controls[0].content.controls[0].src="Image\DownloadSuccess.png"
 
-        else:
+                addNoteFile.content.controls[0].content.controls[0].width=300
+                addNoteFile.content.controls[0].content.controls[0].height=300
+                
+                addNoteFile.actions[0].disabled=False
 
-            self.page.controls[0].content.controls[2].content.controls[2].controls[3].border_color=ft.colors.RED
-
+                self.page.update()
         
-        if (self.page.controls[0].content.controls[2].content.controls[3].controls[3].value != None):
+        def createNoteData(self):
+               
+                try:
+                        shutil.copy(noteFile["Path"], ".\\Data")
 
-            password=self.page.controls[0].content.controls[2].content.controls[3].controls[3].value
+                        bd.reqExecute("Insert into")
 
-        else:
+                        self.page.close_dialog()
 
-            self.page.controls[0].content.controls[2].content.controls[3].controls[3].border_color=ft.colors.RED
+                        self.page.window_height=680
+
+                        self.page.update()
+
+                except Exception as ex:
+
+                        logging.error(f"[{datetime.datetime.now()}] :: File can't copy in selected path, REASON: {ex}")
+
+
+
+
+
+
+        noteFile={'Path':"", 'SelectedFile': ""}
+
+
+        selectedNoteFile=ft.FilePicker(on_result=selectNoteFile)
+
+        addNoteFile=ft.AlertDialog(title=ft.Text("Заметки", color=ft.colors.BLACK), bgcolor="#E4E6F3" ,content=ft.Column(
+                
+               [
+                        ft.Container(content=ft.Column(
+                            [
+                                ft.Image("Image\Download.png", width=80, height=80),
+
+                                ft.Text("",height=5),
+
+                                ft.Text("Нажмите в данной области для загрузки файла", size=14, color="")
+                            
+                            ], horizontal_alignment=ft.CrossAxisAlignment.CENTER, alignment=ft.MainAxisAlignment.CENTER), width=500, height=420, bgcolor=ft.colors.TRANSPARENT, border_radius=14, on_click=lambda a:selectedNoteFile.pick_files(allow_multiple=False, initial_directory=os.path.expanduser('~')+"\\Downloads"))
+
+        ], height=570, width=470, horizontal_alignment=ft.CrossAxisAlignment.CENTER), actions=[
+                                        
+                                        ft.ElevatedButton("Создать", bgcolor="#D9D9D9", color=ft.colors.BROWN_200,height=33,width=100, on_click=createNoteData, disabled=True),
+                                        ft.ElevatedButton("Отмена", bgcolor="#E4E6F3",height=33,width=100, on_click=dialogClose)
+
+                                ])
+        
+        self.page.overlay.extend([selectedNoteFile])
+
+        self.page.show_dialog(addNoteFile)
+
+        self.page.window_height=745
 
         self.page.update()
 
-        #time.sleep(1)
-
-        self.page.controls[0].content.controls[0].controls[1].border_color=ft.colors.BLACK
-        self.page.controls[0].content.controls[2].content.controls[2].controls[3].border_color=ft.colors.BLACK
-        self.page.controls[0].content.controls[2].content.controls[3].controls[3].border_color=ft.colors.BLACK
-
-        self.page.update()
-
-        self.page.close_banner(webAccount_Add)
-        
-        self.page.update()
-
-        print(serviceURL,login,password)
 
 
+def test_page(page:ft.Page):
+       
+       page.add(ft.ElevatedButton("Open dialog", on_click=addNoteData))
 
 
-
-
-    webAccount_Add=ft.AlertDialog(content=
-                                
-                                ft.Column([
-
-                                    ft.Row([
-
-                                        ft.Text("Веб-адрес сайта: ",size=15, color=ft.colors.BLACK, width=120),
-
-                                        ft.TextField(hint_text="Например google.com", height=40),
-
-                                        ft.Text("", width=9),
-
-                                        ft.IconButton(ft.icons.COPY, icon_size=24, icon_color=ft.colors.BLACK, padding=0, data="CopyURL_From_WebCreate")
-                                        
-                                    ], width=500),
-
-                                    ft.Text("", height=13),
-
-                                    ft.Container (content=
-                                        
-                                        ft.Column([
-
-                                            ft.Row([
-
-                                                ft.Text("",width=3),
-
-                                                ft.Text("Аккаунт", size=19,color=ft.colors.BLACK),
-
-                                            ], alignment=ft.MainAxisAlignment.START),
-
-                                            ft.Divider(thickness=1, color="#999595"),
-
-                                            ft.Row([
-
-                                                ft.Text("",width=3),
-
-                                                ft.Text("Логин", size=15, color=ft.colors.BLACK),
-
-                                                ft.Text("",width=60),
-
-                                                ft.TextField(hint_text="Логин"),
-
-                                            ]),
-
-                                            
-                                            ft.Row([
-
-                                                ft.Text("",width=3),
-
-                                                ft.Text("Пароль", size=15, color=ft.colors.BLACK),
-
-                                                ft.Text("",width=0),
-
-                                                ft.IconButton(icon=ft.icons.PASSWORD_SHARP, icon_size=25, tooltip="Показать пароль"),
-
-                                                ft.TextField(hint_text="Пароль"),
-
-                                                ft.IconButton(icon=ft.icons.KEY, icon_size=20, tooltip="Сгенерировать пароль"),
-
-                                            ]),
-                                            
-                                    ],width=500), bgcolor="#D9D9D9", border_radius=14,width=500,height=220),
-                                    
-
-                                ], width=500, height=280), title=ft.Text("Добавление учетной записи"),title_text_style=ft.TextStyle(color=ft.colors.BLACK,size=20) , bgcolor="#E4E6F3",actions=[
-                                        
-                                        ft.ElevatedButton("Создать", bgcolor="#D9D9D9", color=ft.colors.BROWN_200,height=33,width=100, on_click=saveUserData),
-                                        ft.ElevatedButton("Отмена", bgcolor="#E4E6F3",height=33,width=100, on_click= lambda dlg: dialogClose(dlg.control,page))
-
-                                ]
-                                
-            )
-
-
-    dlg_modal = ft.AlertDialog(
-        modal=True,
-        title=ft.Text("Please confirm"),
-        content=ft.Text("Do you really want to delete all those files?"),
-        actions=[
-            ft.TextButton("Yes"),
-            ft.TextButton("No"),
-        ],
-        actions_alignment=ft.MainAxisAlignment.END,
-        on_dismiss=lambda e: print("Modal dialog dismissed!"),)
-    
-    page.add(webAccount_Add,ft.ElevatedButton("Open dialog", on_click=lambda a: clickButton(page)))
-
-
-
-ft.app(test)
+ft.app(test_page)

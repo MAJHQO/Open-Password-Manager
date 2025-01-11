@@ -1,6 +1,6 @@
 import flet as ft, sqlite3 as sq, guiLib as gLib
 import main, time, config, logging, datetime
-import os, logging, bd, hashlib, Lib, pywin32_system32
+import os, logging, bd, hashlib, Lib, pywin32_system32,test
 
 
 
@@ -145,6 +145,8 @@ def startWithoutPass(page: ft.Page):\
                 
 
                 main.main_menu(page)
+
+                return
 
                 
 
