@@ -42,15 +42,20 @@ def reqExecute(request: str):
         print("[ERROR]: Request error: "+str(ex))
 
 
-# reqExecute("Drop table Documetns")
+# reqExecute("Drop table Documents")
+
+# reqExecute("Drop table Bank_Accounts")
 
 # reqExecute("Drop table Web_Accounts")
+
 
 # reqExecute("""Create table Web_Accounts(
 #            ID INT PRIMARY KEY,
 #            Login TEXT,
 #            Password TEXT,
 #            Service_Address TEXT)""")
+
+
 # reqExecute("""Create table Bank_Accounts(
 #            ID INT PRIMARY KEY,
 #            Number TEXT,
@@ -58,7 +63,9 @@ def reqExecute(request: str):
 #            CVC INT,
 #            Card_Owner TEXT,
 #            PIN_Code INT,
-#            Bank_Name TEXT)""")
+#            Bank_Name TEXT,
+#            Bank_URL TEXT)""")
+
 
 # reqExecute("""Create table Documents(
 #            ID INT PRIMARY KEY,

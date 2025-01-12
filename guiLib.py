@@ -1,4 +1,4 @@
-import flet as ft, bd,time, Lib, shutil, datetime, os
+import flet as ft, bd,time, Lib, shutil, datetime, os, keyboard
 
 from main import logging
 from flet import FilePickerResultEvent
@@ -114,13 +114,15 @@ def createWebAccountData(self):
 
                         self.page.close_dialog()
 
+                        Lib.updateUserCardList(self, self.page.controls[0].controls[2].content.controls[1].content, "web")
+
                         self.page.update()
 
 
 
-        webURLField=ft.TextField(hint_text="Например google.com", height=40)
-        loginField=ft.TextField(hint_text="Логин")
-        passwordField=ft.TextField(hint_text="Пароль", password=True)
+        webURLField=ft.TextField(hint_text="Например google.com", height=40, multiline=False)
+        loginField=ft.TextField(hint_text="Логин", multiline=False)
+        passwordField=ft.TextField(hint_text="Пароль", password=True, can_reveal_password=True, multiline=False)
         
         
         webAccount_Add=ft.AlertDialog(content=
@@ -203,7 +205,45 @@ def createWebAccountData(self):
 
 
 
-def createBankAccountData(self):
+def createBankAccountData(self:ft.Dropdown):
+
+        def choiceBankURL(self):
+        
+                if (self.value=="Сбербанк"):
+                       
+                       return "https://online.sberbank.ru"
+                
+                elif (self.value=="Т-Банк"):
+                       
+                       return "https://id.tbank.ru/auth/step?cid=MI1ShJumXc1X"
+
+                elif (self.value=="Альфа-Банк"):
+                       
+                       return "https://private.auth.alfabank.ru/passport/cerberus-mini-blue/dashboard-blue/username?response_type=code&client_id=click-web-adf&scope=openid%20click-web&acr_values=username&non_authorized_user=true"
+
+                elif (self.value=="Газпромбанк"):
+                       
+                       return "https://ib.online.gpb.ru/"
+
+                elif (self.value=="Россельхозбанк"):
+                       
+                       return "https://online.rshb.ru/cas-auth/index?forceAuth=true"
+
+                elif (self.value=="Райффайзен Банк"):
+                       
+                       return "https://online.raiffeisen.ru/login/main"
+
+                elif (self.value=="Росбанк"):
+                       
+                       return "https://online.rosbank.ru"
+
+                elif (self.value=="Ак Барс Банк"):
+                       
+                       return "https://online.akbars.ru"
+
+
+               
+               
        
         def dialogClose(self):
                
@@ -217,30 +257,66 @@ def createBankAccountData(self):
         def createBankAccount(self):
                 
                 check=False
-               
-                if (cardNumber.value==''):
-                      
-                      cardNumber.border_color=ft.colors.RED
 
-                      check=True
-
-                if(cardOverDate.value==''):
+                try:
                        
-                       cardOverDate.border_color=ft.colors.RED
+                        int(cardNumber.value)
 
-                       check=True
+                        if (cardNumber.value==''):
+                        
+                                cardNumber.border_color=ft.colors.RED
 
-                if(cardOwner.value==''):
+                                check=True
+
+                except Exception as ex: 
+
+                        cardNumber.border_color=ft.colors.RED
+
+                        check=True
+                        
+
+                try:
+
+                        int(cardOverDate.value[0:2])
+                        int(cardOverDate.value[3:])
+
+                        if(cardOverDate.value==''):
+                        
+                                cardOverDate.border_color=ft.colors.RED
+
+                                check=True
+
+                except Exception as ex:
+
+                        cardOverDate.border_color=ft.colors.RED
+
+                        check=True
+
+
+                if(Lib.strCheckOnEnglish(cardOwner.value)!=True and cardOwner.value==''):
                        
                        cardOwner.border_color=ft.colors.RED
 
                        check=True
 
-                if(cardCVC.value==''):
-                       
-                       cardCVC.border_color=ft.colors.RED
+                
+                try:
 
-                       check=True
+                        int(cardCVC.value)
+
+                        if(cardCVC.value==''):
+                        
+                                cardCVC.border_color=ft.colors.RED
+
+                                check=True
+                
+                except Exception as ex:
+
+                        cardCVC.border_color=ft.colors.RED
+
+                        check=True
+                        
+
 
                 if(cardBankName.value==''):
                        
@@ -248,22 +324,41 @@ def createBankAccountData(self):
 
                        check=True
 
-                if(cardPincode.value==''):
+
+                try:
+
+                        int(cardPincode.value)
+
+                        if(cardPincode.value==''):
+                        
+                                cardPincode.border_color=ft.colors.RED
+
+                except Exception as ex:
+
+                        cardPincode.border_color=ft.colors.RED
+
+
+                if (bankAccountURLControl.data==''):
                        
-                       cardPincode.border_color=ft.colors.RED
+                       bankAccountURLControl.border_color=ft.colors.RED
+
 
                 if (check==False):
 
+                        bankURL=choiceBankURL(bankAccountURLControl)
+
                         if (cardPincode.value=="" or cardPincode.value==None):
 
-                                bd.reqExecute(f"Insert Into Bank_Accounts(ID, Number, Date, CVC, Card_Owner, PIN_Code, Bank_Name) values((Select COUNT(*) from Bank_Accounts)+1, '{Lib.encryption(cardNumber.value)}', '{Lib.encryption(cardOverDate.value)}', '{Lib.encryption(cardCVC.value)}', '{Lib.encryption(cardOwner)}', ' ', '{Lib.encryption(cardBankName.value)}')")
+                                bd.reqExecute(f"Insert Into Bank_Accounts(ID, Number, Date, CVC, Card_Owner, PIN_Code, Bank_Name, Bank_URL) values((Select COUNT(*) from Bank_Accounts)+1, '{Lib.encryption(cardNumber.value)}', '{Lib.encryption(cardOverDate.value)}', '{Lib.encryption(cardCVC.value)}', '{Lib.encryption(cardOwner.value)}', '0', '{Lib.encryption(cardBankName.value)}', '{bankURL}')")
 
                         else:
                                
-                                bd.reqExecute(f"Insert Into Bank_Accounts(ID, Number, Date, CVC, Card_Owner, PIN_Code, Bank_Name) values((Select COUNT(*) from Bank_Accounts)+1, '{Lib.encryption(cardNumber.value)}', '{Lib.encryption(cardOverDate.value)}', '{Lib.encryption(cardCVC.value)}', '{Lib.encryption(cardOwner)}', '{Lib.encryption(cardPincode.value)}', '{Lib.encryption(cardBankName.value)}')")
+                                bd.reqExecute(f"Insert Into Bank_Accounts(ID, Number, Date, CVC, Card_Owner, PIN_Code, Bank_Name, Bank_URL) values((Select COUNT(*) from Bank_Accounts)+1, '{Lib.encryption(cardNumber.value)}', '{Lib.encryption(cardOverDate.value)}', '{Lib.encryption(cardCVC.value)}', '{Lib.encryption(cardOwner.value)}', '{Lib.encryption(cardPincode.value)}', '{Lib.encryption(cardBankName.value)}'. '{bankURL}')")
 
                         
-                        self.page.close_dialog(bankAccount)
+                        self.page.close_dialog()
+
+                        Lib.updateUserCardList(self, self.page.controls[0].controls[2].content.controls[1].content, "bank")
                         
                         self.page.update()
 
@@ -281,6 +376,7 @@ def createBankAccountData(self):
                     cardCVC.border_color=ft.colors.BLACK
                     cardBankName.border_color=ft.colors.BLACK
                     cardPincode.border_color=ft.colors.BLACK
+                    bankAccountURLControl.border_color=ft.colors.BLACK
 
                     self.page.update()
 
@@ -288,13 +384,25 @@ def createBankAccountData(self):
 
 
 
-        cardNumber=ft.TextField(hint_text="Номер карты")
-        cardOverDate=ft.TextField(hint_text="Дата окончания действия карты")
+        cardNumber=ft.TextField(hint_text="Номер карты", max_length=19, on_change=maskedTextFieldNumber)
+        cardOverDate=ft.TextField(hint_text="Дата окончания действия карты", max_length=5, on_change=maskedTextFieldDate)
         cardOwner=ft.TextField(hint_text="Владелец карты (на английском)")
-        cardCVC=ft.TextField(hint_text="CVC-код")
+        cardCVC=ft.TextField(hint_text="CVC-код", password=True,can_reveal_password=True)
         cardBankName=ft.TextField(hint_text="Название банка (на любом языке)")
 
-        cardPincode=ft.TextField(hint_text="Pin-код от карты")
+        cardPincode=ft.TextField(hint_text="Pin-код от карты", password=True, can_reveal_password=True)
+        bankAccountURLControl=ft.Dropdown(width=190, options=[
+               
+               ft.dropdown.Option("Сбербанк"),
+               ft.dropdown.Option("Т-Банк"),
+               ft.dropdown.Option("Альфа-Банк"),
+               ft.dropdown.Option("Газпромбанк"),
+               ft.dropdown.Option("Россельхозбанк"),
+               ft.dropdown.Option("Райффайзен Банк"),
+               ft.dropdown.Option("Росбанк"),
+               ft.dropdown.Option("Ак Барс Банк"),
+
+        ], filled=True, fill_color="#E4E6F3")
 
         bankAccount=ft.AlertDialog(title=ft.Text("Банковские данные", color=ft.colors.BLACK), bgcolor="#E4E6F3" ,content=ft.Column(
                 
@@ -379,34 +487,47 @@ def createBankAccountData(self):
                         ft.Container(ft.Column(
                                [
                                    
-                                    ft.Text("",height=2),
+                                        ft.Text("",height=2),
 
-                                    
-                                    ft.Row([
+                                        
+                                        ft.Row([
+                                                
+                                                        ft.Text("", width=3),
+                                        
+                                                        ft.Text("Необязательные данные", size=19, color=ft.colors.BLACK)
+                                        ]),
+
+                                        ft.Divider(thickness=1, color="#999595"),
+
+
+                                        ft.Row([
+                                                
+                                                ft.Text("", width=3),
+                                        
+                                                ft.Text("Pin-код", size=15, color=ft.colors.BLACK),
+
+                                                ft.Text("", width=60),
+
+                                                cardPincode
+
+                                        ]),
+
+                                        ft.Row([
                                              
                                                 ft.Text("", width=3),
                                       
-                                                ft.Text("Необязательные данные", size=19, color=ft.colors.BLACK)
-                                      ]),
+                                                ft.Text("Ссылка на личный кабинет", size=15, color=ft.colors.BLACK),
 
-                                    ft.Divider(thickness=1, color="#999595"),
+                                                ft.Text("", width=30),
 
+                                                bankAccountURLControl
 
-                                    ft.Row([
-                                             
-                                            ft.Text("", width=3),
-                                      
-                                            ft.Text("Pin-код", size=15, color=ft.colors.BLACK),
-
-                                            ft.Text("", width=60),
-
-                                        cardPincode
 
                                       ])
                                
-                               ]), bgcolor="#D9D9D9", width=500, height=130, border_radius=14)
+                               ]), bgcolor="#D9D9D9", width=550, height=200, border_radius=14)
 
-        ], height=570, width=470, horizontal_alignment=ft.CrossAxisAlignment.START), actions=[
+        ], height=670, width=470, horizontal_alignment=ft.CrossAxisAlignment.START), actions=[
                                         
                                         ft.ElevatedButton("Создать", bgcolor="#D9D9D9", color=ft.colors.BROWN_200,height=33,width=100, on_click=createBankAccount),
                                         ft.ElevatedButton("Отмена", bgcolor="#E4E6F3",height=33,width=100, on_click=dialogClose)
@@ -416,7 +537,7 @@ def createBankAccountData(self):
 
         self.page.show_dialog(bankAccount)
 
-        self.page.window_height=745
+        self.page.window_height=820
 
         self.page.update()
 
@@ -457,7 +578,7 @@ def addNoteData(self):
                         addNoteFile.content.controls[0].content.controls[2].value=f"Файл '{me.files[0].name}' не является подходящим по формату"
                         addNoteFile.content.controls[0].content.controls[2].text_align=ft.TextAlign.CENTER
                         
-                        addNoteFile.content.controls[0].content.controls[0].src="Icons\Error.png"
+                        addNoteFile.content.controls[0].content.controls[0].src="Image\DownloadError.png"
 
                         addNoteFile.content.controls[0].content.controls[0].width=300
                         addNoteFile.content.controls[0].content.controls[0].height=300
@@ -468,55 +589,72 @@ def addNoteData(self):
         def createNoteData(self):
                
                 try:
+
                         fileData=""
-
-                        with open (noteFile["Path"], 'r') as file:
-                               
-                               fileData=file.read()
-
-                        with open (".\\Data\\"+noteFile["SelectedFile"], "w") as eFile:
-                               
-                               eFile.writelines(Lib.encryption(fileData))
-
 
                         if (noteFile["SelectedFile"].split(".")[1]=="txt"):
 
+                                with open (noteFile["Path"], 'r') as file:
+                                
+                                        fileData=file.read()
+
+                                with open (".\\Data\\e"+noteFile["SelectedFile"], "w") as eFile:
+                                
+                                        eFile.writelines(Lib.encryption(fileData))
+
+                                
                                 with open(noteFile["Path"], "r") as file:
                                        
                                         data=file.read()
 
-                                        bd.reqExecute(f"Insert into Documents (ID, Filename, Format, Filedata,PageCount) values((Select COUNT(*) from Documents)+1, '{noteFile['SelectedFile'].split(".")[0]}', '{noteFile['SelectedFile'].split(".")[1]}', '{Lib.encryption(fileData)}', '{data}')")
+                                        bd.reqExecute(f"Insert into Documents (ID, Filename, Format, Filedata,PageCount) values((Select COUNT(*) from Documents)+1, '{Lib.encryption(noteFile['SelectedFile'].split(".")[0])}', '{Lib.encryption(noteFile['SelectedFile'].split(".")[1])}', '{Lib.encryption(fileData)}', '{data}')")
 
                         elif(noteFile["SelectedFile"].split(".")[1]=="md"):
                                
-                               with open(noteFile["Path"], "r", encoding="utf-8") as file:
+                                with open(noteFile["Path"], "r", encoding="utf-8") as file:
                                        
-                                        data=file.read()
+                                        fileData=file.read()
 
-                                        bd.reqExecute(f"Insert into Documents (ID, Filename, Format, Filedata,PageCount) values((Select COUNT(*) from Documents)+1, '{noteFile['SelectedFile'].split(".")[0]}', '{noteFile['SelectedFile'].split(".")[1]}', '{Lib.encryption(fileData)}', '{data}')")
+                                with open (".\\Data\\e"+noteFile["SelectedFile"], "w") as eFile:
+                                
+                                        eFile.writelines(Lib.encryption(fileData))
+                                
+                                        bd.reqExecute(f"Insert into Documents (ID, Filename, Format, Filedata,PageCount) values((Select COUNT(*) from Documents)+1, '{Lib.encryption(noteFile['SelectedFile'].split(".")[0])}', '{Lib.encryption(noteFile['SelectedFile'].split(".")[1])}', '{Lib.encryption(fileData)}', 0)")
 
                         elif(noteFile["SelectedFile"].split(".")[1] in ['doc', 'docx']):
                                
-                                document=Document(".\\Todo.rtf")
-
-                                data = ""
+                                document=Document(noteFile["Path"])
 
                                 for para in document.paragraphs:
                                 
-                                        data+=para.text+"\n"
+                                        fileData+=para.text+"\n"
 
-                                bd.reqExecute(f"Insert into Documents (ID, Filename, Format, Filedata,PageCount) values((Select COUNT(*) from Documents)+1, '{noteFile['SelectedFile'].split(".")[0]}', '{noteFile['SelectedFile'].split(".")[1]}', '{Lib.encryption(fileData)}', '{data}')")
+                                with open (".\\Data\\e"+noteFile["SelectedFile"], "w") as eFile:
+                                
+                                        eFile.writelines(Lib.encryption(fileData))
 
+                                        bd.reqExecute(f"Insert into Documents (ID, Filename, Format, Filedata,PageCount) values((Select COUNT(*) from Documents)+1, '{Lib.encryption(noteFile['SelectedFile'].split(".")[0])}', '{Lib.encryption(noteFile['SelectedFile'].split(".")[1])}', '{Lib.encryption(fileData)}', 0)")
+
+                        
                         elif(noteFile["SelectedFile"].split(".")[1]=="rtf"):
                                
-                               with open(noteFile["Path"], "r") as file:
+                                with open(noteFile["Path"], "r") as file:
                                        
-                                        data=file.read()
+                                        fileData=file.read()
 
-                                        bd.reqExecute(f"Insert into Documents (ID, Filename, Format, Filedata,PageCount) values((Select COUNT(*) from Documents)+1, '{noteFile['SelectedFile'].split(".")[0]}', '{noteFile['SelectedFile'].split(".")[1]}', '{Lib.encryption(fileData)}', '{rtf_to_text(data)}')")
+                                
+                                with open (".\\Data\\e"+noteFile["SelectedFile"], "w") as eFile:
+
+                                        rtfData=rtf_to_text(fileData)
+                                
+                                        eFile.writelines(Lib.encryption(rtfData))
+                                
+                                        bd.reqExecute(f"Insert into Documents (ID, Filename, Format, Filedata,PageCount) values((Select COUNT(*) from Documents)+1, '{Lib.encryption(noteFile['SelectedFile'].split(".")[0])}', '{Lib.encryption(noteFile['SelectedFile'].split(".")[1])}', '{Lib.encryption(rtfData)}', 0)")
                         
                         
                         self.page.close_dialog()
+
+                        Lib.updateUserCardList(self, self.page.controls[0].controls[1].content.controls[1].content, "note")
 
                         self.page.window_height=680
 
@@ -561,5 +699,32 @@ def addNoteData(self):
         self.page.show_dialog(addNoteFile)
 
         self.page.window_height=745
+
+        self.page.update()
+
+
+def maskedTextFieldNumber(self):
+
+        if (keyboard.is_pressed("Backspace")==False):
+       
+                if(len(self.control.value) in [4,9,14]):
+                
+                        self.control.value+=" "
+
+        self.page.update()
+
+
+
+def maskedTextFieldDate(self):
+
+        if (keyboard.is_pressed("Backspace")==False):
+
+                if (len(self.control.value)==1 and self.control.value!="0"):
+                
+                        self.control.value="0"+self.control.value+"/"
+        
+                elif(len(self.control.value)==2):
+                
+                        self.control.value+="/"
 
         self.page.update()

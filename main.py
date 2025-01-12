@@ -9,6 +9,8 @@ def main_menu(page:ft.Page):
 
         Lib.updateUserCardList(self, cardListView)
 
+        page.update()
+
 
 
 
@@ -66,14 +68,14 @@ def main_menu(page:ft.Page):
                                                     ft.PopupMenuItem("Заметки",data="Notes", on_click=gLib.addNoteData)
                                                 ], shadow_color=ft.colors.BLACK, bgcolor="#B0ADAD", padding=0),
 
-                                        ], width=1050, height=100), width=1050, height=100, bgcolor="#D9D9D9"),
+                                        ], width=1050, height=100), width=1060, height=100, bgcolor="#D9D9D9"),
 
 
                                         ft.Container(content=cardListView, width=1050, height=550, bgcolor=ft.colors.TRANSPARENT)
                                         
 
 
-                                        ]), bgcolor=ft.colors.TRANSPARENT, height=500,width=1050
+                                        ]), bgcolor=ft.colors.TRANSPARENT, height=500,width=1060
 
     )
     
@@ -83,6 +85,82 @@ def main_menu(page:ft.Page):
     page.add(ft.Row([leftElementContainer, ft.Text("", width=5), topElementContainer], spacing=0, vertical_alignment=ft.CrossAxisAlignment.START))
 
     #ft.Column([mainElementContainer], height=750, width=1200,alignment=ft.MainAxisAlignment.CENTER, horizontal_alignment=ft.CrossAxisAlignment.START)
+
+    
+    result=bd.reqExecute("Select * from Web_Accounts")
+
+    countElementIndex=0
+
+    totalDict={'Login': "", 'Password': "", "Service Name": ""}
+
+    for i in range (0,len(result)):
+
+                if (len(cardListView.controls[countElementIndex].controls)<=4):
+
+
+                        totalDict["Login"]=Lib.deecrypt(result[i][1].encode())
+                        totalDict["Password"]=Lib.deecrypt(result[i][2].encode())
+                        totalDict["Service Name"]=Lib.deecrypt(result[i][3].encode())
+
+                        userCard=Lib.createUserCard('web', totalDict)
+
+                        cardListView.controls[countElementIndex].controls.append(userCard)
+
+                else:
+
+                        cardListView.controls.append(ft.Row())
+                        
+                        countElementIndex+=1
+
+
+    result=bd.reqExecute("Select * from Bank_Accounts")
+
+    totalDict={'Number': "", 'Date': "", "CVC": "", 'Bank Name': "", 'Bank URL': ""}
+
+    for i in range (0,len(result)):
+
+                    if (len(cardListView.controls[countElementIndex].controls)<=4):
+
+                        totalDict["Number"]=Lib.deecrypt(result[i][1].encode())
+                        totalDict["Date"]=Lib.deecrypt(result[i][2].encode())
+                        totalDict["CVC"]=Lib.deecrypt(result[i][3].encode())
+                        totalDict["Bank Name"]=Lib.deecrypt(result[i][6].encode())
+                        totalDict["Bank URL"]=Lib.deecrypt(result[i][7].encode())
+
+                        userCard=Lib.createUserCard('bank', totalDict)
+
+                        cardListView.controls[countElementIndex].controls.append(userCard)
+
+                    else:
+
+                        cardListView.controls.append(ft.Row())
+                        
+                        countElementIndex+=1
+
+            
+    result=bd.reqExecute("Select * from Documents")
+
+    totalDict={'Filename': "", 'Format': "", "FileData": ""}
+
+    for i in range (0,len(result)):
+
+                    if (len(cardListView.controls[countElementIndex].controls)<=4):
+
+                        totalDict["Filename"]=Lib.deecrypt(result[i][1].encode())
+                        totalDict["Format"]=Lib.deecrypt(result[i][2].encode())
+                        totalDict["FileData"]=Lib.deecrypt(result[i][3].encode())
+
+                        userCard=Lib.createUserCard('note', totalDict)
+
+                        cardListView.controls[countElementIndex].controls.append(userCard)
+
+                    else:
+
+                        cardListView.controls.append(ft.Row())
+                        
+                        countElementIndex+=1
+
+
 
     page.update()
 
