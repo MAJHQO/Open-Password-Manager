@@ -556,12 +556,12 @@ def addNoteData(self):
         
         def selectNoteFile(me: FilePickerResultEvent):
 
-                if (me.files[0].name.split(".")[1] in ['txt', 'md', 'doc', 'docx', 'rtf']):
+                if (me.files[0].name.split('.')[1] in ['txt', 'md', 'doc', 'docx', 'rtf']):
                
                         noteFile["Path"]=me.files[0].path
-                        noteFile["SelectedFile"]=me.files[0].name
+                        noteFile['SelectedFile']=me.files[0].name
 
-                        addNoteFile.content.controls[0].content.controls[2].value=f"Файл '{noteFile["SelectedFile"]}' успешно выбран\n\nНе забудьте удалить выбранный файл, с целью безопасности хранения текущего"
+                        addNoteFile.content.controls[0].content.controls[2].value=f"Файл '{noteFile['SelectedFile']}' успешно выбран\n\nНе забудьте удалить выбранный файл, с целью безопасности хранения текущего"
                         addNoteFile.content.controls[0].content.controls[2].text_align=ft.TextAlign.CENTER
                         
                         addNoteFile.content.controls[0].content.controls[0].src="Image\DownloadSuccess.png"
@@ -592,13 +592,13 @@ def addNoteData(self):
 
                         fileData=""
 
-                        if (noteFile["SelectedFile"].split(".")[1]=="txt"):
+                        if (noteFile['SelectedFile'].split('.')[1]=="txt"):
 
                                 with open (noteFile["Path"], 'r') as file:
                                 
                                         fileData=file.read()
 
-                                with open (".\\Data\\e"+noteFile["SelectedFile"], "w") as eFile:
+                                with open (".\\Data\\e"+noteFile['SelectedFile'], "w") as eFile:
                                 
                                         eFile.writelines(Lib.encryption(fileData))
 
@@ -607,21 +607,21 @@ def addNoteData(self):
                                        
                                         data=file.read()
 
-                                        bd.reqExecute(f"Insert into Documents (ID, Filename, Format, Filedata,PageCount) values((Select COUNT(*) from Documents)+1, '{Lib.encryption(noteFile['SelectedFile'].split(".")[0])}', '{Lib.encryption(noteFile['SelectedFile'].split(".")[1])}', '{Lib.encryption(fileData)}', '{data}')")
+                                        bd.reqExecute(f"Insert into Documents (ID, Filename, Format, Filedata,PageCount) values((Select COUNT(*) from Documents)+1, '{Lib.encryption(noteFile['SelectedFile'].split('.')[0])}', '{Lib.encryption(noteFile['SelectedFile'].split('.')[1])}', '{Lib.encryption(fileData)}', '{data}')")
 
-                        elif(noteFile["SelectedFile"].split(".")[1]=="md"):
+                        elif(noteFile['SelectedFile'].split('.')[1]=="md"):
                                
                                 with open(noteFile["Path"], "r", encoding="utf-8") as file:
                                        
                                         fileData=file.read()
 
-                                with open (".\\Data\\e"+noteFile["SelectedFile"], "w") as eFile:
+                                with open (".\\Data\\e"+noteFile['SelectedFile'], "w") as eFile:
                                 
                                         eFile.writelines(Lib.encryption(fileData))
                                 
-                                        bd.reqExecute(f"Insert into Documents (ID, Filename, Format, Filedata,PageCount) values((Select COUNT(*) from Documents)+1, '{Lib.encryption(noteFile['SelectedFile'].split(".")[0])}', '{Lib.encryption(noteFile['SelectedFile'].split(".")[1])}', '{Lib.encryption(fileData)}', 0)")
+                                        bd.reqExecute(f"Insert into Documents (ID, Filename, Format, Filedata,PageCount) values((Select COUNT(*) from Documents)+1, '{Lib.encryption(noteFile['SelectedFile'].split('.')[0])}', '{Lib.encryption(noteFile['SelectedFile'].split('.')[1])}', '{Lib.encryption(fileData)}', 0)")
 
-                        elif(noteFile["SelectedFile"].split(".")[1] in ['doc', 'docx']):
+                        elif(noteFile['SelectedFile'].split('.')[1] in ['doc', 'docx']):
                                
                                 document=Document(noteFile["Path"])
 
@@ -629,27 +629,27 @@ def addNoteData(self):
                                 
                                         fileData+=para.text+"\n"
 
-                                with open (".\\Data\\e"+noteFile["SelectedFile"], "w") as eFile:
+                                with open (".\\Data\\e"+noteFile['SelectedFile'], "w") as eFile:
                                 
                                         eFile.writelines(Lib.encryption(fileData))
 
-                                        bd.reqExecute(f"Insert into Documents (ID, Filename, Format, Filedata,PageCount) values((Select COUNT(*) from Documents)+1, '{Lib.encryption(noteFile['SelectedFile'].split(".")[0])}', '{Lib.encryption(noteFile['SelectedFile'].split(".")[1])}', '{Lib.encryption(fileData)}', 0)")
+                                        bd.reqExecute(f"Insert into Documents (ID, Filename, Format, Filedata,PageCount) values((Select COUNT(*) from Documents)+1, '{Lib.encryption(noteFile['SelectedFile'].split('.')[0])}', '{Lib.encryption(noteFile['SelectedFile'].split('.')[1])}', '{Lib.encryption(fileData)}', 0)")
 
                         
-                        elif(noteFile["SelectedFile"].split(".")[1]=="rtf"):
+                        elif(noteFile['SelectedFile'].split('.')[1]=="rtf"):
                                
                                 with open(noteFile["Path"], "r") as file:
                                        
                                         fileData=file.read()
 
                                 
-                                with open (".\\Data\\e"+noteFile["SelectedFile"], "w") as eFile:
+                                with open (".\\Data\\e"+noteFile['SelectedFile'], "w") as eFile:
 
                                         rtfData=rtf_to_text(fileData)
                                 
                                         eFile.writelines(Lib.encryption(rtfData))
                                 
-                                        bd.reqExecute(f"Insert into Documents (ID, Filename, Format, Filedata,PageCount) values((Select COUNT(*) from Documents)+1, '{Lib.encryption(noteFile['SelectedFile'].split(".")[0])}', '{Lib.encryption(noteFile['SelectedFile'].split(".")[1])}', '{Lib.encryption(rtfData)}', 0)")
+                                        bd.reqExecute(f"Insert into Documents (ID, Filename, Format, Filedata,PageCount) values((Select COUNT(*) from Documents)+1, '{Lib.encryption(noteFile['SelectedFile'].split('.')[0])}', '{Lib.encryption(noteFile['SelectedFile'].split('.')[1])}', '{Lib.encryption(rtfData)}', 0)")
                         
                         
                         self.page.close_dialog()

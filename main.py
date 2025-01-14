@@ -1,5 +1,5 @@
 import flet as ft, sqlite3 as sq
-import os, logging, bd, guiLib as gLib, hashlib, Lib, pywin32_system32
+import logging, bd, guiLib as gLib, Lib, pywin32_system32
 
 
 
@@ -26,6 +26,8 @@ def main_menu(page:ft.Page):
     page.window_height=680
     page.window_width=1312
 
+    page.window_resizable=False
+
 
     cardListView=ft.ListView(controls=[ft.Row([])], expand=1)
 
@@ -38,8 +40,8 @@ def main_menu(page:ft.Page):
         
         ft.NavigationRail(label_type=ft.NavigationRailLabelType.ALL, group_alignment=-0.9 , indicator_color="#B0ADAD" , width=220,height=500, bgcolor="#D9D9D9", unselected_label_text_style=ft.TextStyle(color="#333333", size=15), selected_label_text_style=ft.TextStyle(color=ft.colors.BLACK, size=15), selected_index=0, destinations=[
         
-            ft.NavigationDestination(label="Все записи", icon=ft.icons.NOTES, selected_icon=ft.Icons.NOTES_ROUNDED), 
-            ft.NavigationDestination(label="\tАккаунты", icon=ft.icons.ACCOUNT_TREE_OUTLINED,selected_icon=ft.Icons.ACCOUNT_TREE_ROUNDED),
+            ft.NavigationDestination(label="Все записи", icon=ft.icons.NOTES, selected_icon=ft.icons.NOTES_ROUNDED), 
+            ft.NavigationDestination(label="\tАккаунты", icon=ft.icons.ACCOUNT_TREE_OUTLINED,selected_icon=ft.icons.ACCOUNT_TREE_ROUNDED),
             ft.NavigationDestination(label="Банковские данные", icon=ft.icons.CREDIT_CARD_OUTLINED, selected_icon=ft.icons.CREDIT_CARD_ROUNDED),
             ft.NavigationDestination(label="Заметки", icon=ft.icons.NOTE_SHARP)], on_change=pageChange)
         

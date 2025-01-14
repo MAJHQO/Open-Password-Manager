@@ -1,6 +1,6 @@
-import flet as ft, sqlite3 as sq, guiLib as gLib
-import main, time, config, logging, datetime
-import os, logging, bd, hashlib, Lib, pywin32_system32,test
+import flet as ft, guiLib as gLib
+import main, time, logging, datetime
+import os, logging, Lib, pywin32_system32
 
 
 
@@ -62,6 +62,7 @@ def start(page: ft.Page):
         page.bgcolor="#E4E6F3"
         page.window_height=670
         page.window_width=1200
+        page.window_resizable=False
 
         
 
@@ -108,6 +109,7 @@ def startWithoutPass(page: ft.Page):\
     page.bgcolor="#E4E6F3"
     page.window_height=670
     page.window_width=1200
+    page.window_resizable=False
 
 
 
@@ -173,7 +175,7 @@ def startWithoutPass(page: ft.Page):\
             ft.Image("Image\createPassLogo.svg", width=200, height=300),
             ft.Container(content=ft.Column(controls=[ft.Text("Создание хранилища",size=40,font_family="Kufam", color=ft.colors.BLACK),
                                                      ft.Text("Мастер-пароль является единственным ключом, который способен открыть ваше хранилище\nпаролей и осуществить расшивровку данных. В случае, если данный пароль будет утерян - мы не сможем его\nвосстановить.\n\nПри создании мастер-пароля для хранилища, рукомедуется использовать различные символы (@, %,!, & #), в\nсочетании с буквами и цифрами", size=14,color=ft.colors.BLACK),
-                                                     ft.TextField(label="Мастер-пароль", hint_text="Введите мастер-пароль",width=350, border_color="#C1C2CF",on_focus=gLib.focusField, max_lines=1, on_blur=gLib.blurField, on_change=changeButtonText ,password=True,can_reveal_password=True ,hover_color=ft.colors.BLACK)
+                                                     ft.TextField(label="Мастер-пароль", hint_text="Введите мастер-пароль",width=350, border_color="#C1C2CF",on_focus=gLib.focusField, max_lines=1, on_blur=gLib.blurField, on_change=changeButtonText ,password=True,can_reveal_password=True)
                                                      ], spacing=20), on_hover=gLib.focusField)], 
             
             alignment=ft.MainAxisAlignment.CENTER, spacing=70, vertical_alignment=ft.CrossAxisAlignment.CENTER)
@@ -190,6 +192,8 @@ def startWithoutPass(page: ft.Page):\
 
 
         page.clean()
+
+        page.window_resizable=False
 
 
         mainSoftName=ft.Row(controls=[

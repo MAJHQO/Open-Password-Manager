@@ -100,7 +100,88 @@ def deecrypt(data: bytes)->str:
 
 def updateUserCardList(obj, cardList: ft.ListView, updatePage=""):
 
-    if (obj.data=="0" or updatePage=='all'):
+    try:
+
+        if (obj.data=="0" or updatePage=='all'):
+
+                    cardList.controls.clear()
+                    cardList.controls.append(ft.Row([]))
+
+                    result=bd.reqExecute("Select * from Web_Accounts")
+
+                    countElementIndex=0
+
+                    totalDict={'Login': "", 'Password': "", "Service Name": ""}
+
+                    for i in range (0,len(result)):
+
+                        if (len(cardList.controls[countElementIndex].controls)<=4):
+
+
+                            totalDict["Login"]=deecrypt(result[i][1].encode())
+                            totalDict["Password"]=deecrypt(result[i][2].encode())
+                            totalDict["Service Name"]=deecrypt(result[i][3].encode())
+
+                            userCard=createUserCard('web', totalDict)
+
+                            cardList.controls[countElementIndex].controls.append(userCard)
+
+                        else:
+
+                            cardList.controls.append(ft.Row())
+                            
+                            countElementIndex+=1
+
+
+                    result=bd.reqExecute("Select * from Bank_Accounts")
+
+                    totalDict={'Number': "", 'Date': "", "CVC": "", 'Bank Name': "", 'Bank URL': ""}
+
+                    for i in range (0,len(result)):
+
+                        if (len(cardList.controls[countElementIndex].controls)<=4):
+
+                            totalDict["Number"]=deecrypt(result[i][1].encode())
+                            totalDict["Date"]=deecrypt(result[i][2].encode())
+                            totalDict["CVC"]=deecrypt(result[i][3].encode())
+                            totalDict["Bank Name"]=deecrypt(result[i][6].encode())
+                            totalDict["Bank URL"]=deecrypt(result[i][7].encode())
+
+                            userCard=createUserCard('bank', totalDict)
+
+                            cardList.controls[countElementIndex].controls.append(userCard)
+
+                        else:
+
+                            cardList.controls.append(ft.Row())
+                            
+                            countElementIndex+=1
+
+                
+                    result=bd.reqExecute("Select * from Documents")
+
+                    totalDict={'Filename': "", 'Format': "", "FileData": ""}
+
+                    for i in range (0,len(result)):
+
+                        if (len(cardList.controls[countElementIndex].controls)<=4):
+
+                            totalDict["Filename"]=deecrypt(result[i][1].encode())
+                            totalDict["Format"]=deecrypt(result[i][2].encode())
+                            totalDict["FileData"]=deecrypt(result[i][3].encode())
+
+                            userCard=createUserCard('note', totalDict)
+
+                            cardList.controls[countElementIndex].controls.append(userCard)
+
+                        else:
+
+                            cardList.controls.append(ft.Row())
+                            
+                            countElementIndex+=1
+
+
+        elif (obj.data=="1" or updatePage=='web'):
 
                 cardList.controls.clear()
                 cardList.controls.append(ft.Row([]))
@@ -131,75 +212,28 @@ def updateUserCardList(obj, cardList: ft.ListView, updatePage=""):
                         countElementIndex+=1
 
 
-                result=bd.reqExecute("Select * from Bank_Accounts")
+        elif (obj.data=="2" or updatePage=='bank'):
 
-                totalDict={'Number': "", 'Date': "", "CVC": "", 'Bank Name': "", 'Bank URL': ""}
-
-                for i in range (0,len(result)):
-
-                    if (len(cardList.controls[countElementIndex].controls)<=4):
-
-                        totalDict["Number"]=deecrypt(result[i][1].encode())
-                        totalDict["Date"]=deecrypt(result[i][2].encode())
-                        totalDict["CVC"]=deecrypt(result[i][3].encode())
-                        totalDict["Bank Name"]=deecrypt(result[i][6].encode())
-                        totalDict["Bank URL"]=deecrypt(result[i][7].encode())
-
-                        userCard=createUserCard('bank', totalDict)
-
-                        cardList.controls[countElementIndex].controls.append(userCard)
-
-                    else:
-
-                        cardList.controls.append(ft.Row())
-                        
-                        countElementIndex+=1
-
-            
-                result=bd.reqExecute("Select * from Documents")
-
-                totalDict={'Filename': "", 'Format': "", "FileData": ""}
-
-                for i in range (0,len(result)):
-
-                    if (len(cardList.controls[countElementIndex].controls)<=4):
-
-                        totalDict["Filename"]=deecrypt(result[i][1].encode())
-                        totalDict["Format"]=deecrypt(result[i][2].encode())
-                        totalDict["FileData"]=deecrypt(result[i][3].encode())
-
-                        userCard=createUserCard('note', totalDict)
-
-                        cardList.controls[countElementIndex].controls.append(userCard)
-
-                    else:
-
-                        cardList.controls.append(ft.Row())
-                        
-                        countElementIndex+=1
-
-
-    elif (obj.data=="1" or updatePage=='web'):
+            result=bd.reqExecute("Select * from Bank_Accounts")
 
             cardList.controls.clear()
             cardList.controls.append(ft.Row([]))
 
-            result=bd.reqExecute("Select * from Web_Accounts")
-
             countElementIndex=0
 
-            totalDict={'Login': "", 'Password': "", "Service Name": ""}
+            totalDict={'Number': "", 'Date': "", "CVC": "", 'Bank Name': "", 'Bank URL': ""}
 
             for i in range (0,len(result)):
 
                 if (len(cardList.controls[countElementIndex].controls)<=4):
 
+                    totalDict["Number"]=deecrypt(result[i][1].encode())
+                    totalDict["Date"]=deecrypt(result[i][2].encode())
+                    totalDict["CVC"]=deecrypt(result[i][3].encode())
+                    totalDict["Bank Name"]=deecrypt(result[i][6].encode())
+                    totalDict["Bank URL"]=deecrypt(result[i][7].encode())
 
-                    totalDict["Login"]=deecrypt(result[i][1].encode())
-                    totalDict["Password"]=deecrypt(result[i][2].encode())
-                    totalDict["Service Name"]=deecrypt(result[i][3].encode())
-
-                    userCard=createUserCard('web', totalDict)
+                    userCard=createUserCard('bank', totalDict)
 
                     cardList.controls[countElementIndex].controls.append(userCard)
 
@@ -210,66 +244,38 @@ def updateUserCardList(obj, cardList: ft.ListView, updatePage=""):
                     countElementIndex+=1
 
 
-    elif (obj.data=="2" or updatePage=='bank'):
+        elif (obj.data=="3" or updatePage=='note'):
 
-        result=bd.reqExecute("Select * from Bank_Accounts")
+            result=bd.reqExecute("Select * from Documents")
 
-        cardList.controls.clear()
-        cardList.controls.append(ft.Row([]))
+            cardList.controls.clear()
+            cardList.controls.append(ft.Row([]))
 
-        countElementIndex=0
+            countElementIndex=0
 
-        totalDict={'Number': "", 'Date': "", "CVC": "", 'Bank Name': "", 'Bank URL': ""}
+            totalDict={'Filename': "", 'Format': "", "FileData": ""}
 
-        for i in range (0,len(result)):
+            for i in range (0,len(result)):
 
-            if (len(cardList.controls[countElementIndex].controls)<=4):
+                if (len(cardList.controls[countElementIndex].controls)<=4):
 
-                totalDict["Number"]=deecrypt(result[i][1].encode())
-                totalDict["Date"]=deecrypt(result[i][2].encode())
-                totalDict["CVC"]=deecrypt(result[i][3].encode())
-                totalDict["Bank Name"]=deecrypt(result[i][6].encode())
-                totalDict["Bank URL"]=deecrypt(result[i][7].encode())
+                    totalDict["Filename"]=deecrypt(result[i][1].encode())
+                    totalDict["Format"]=deecrypt(result[i][2].encode())
+                    totalDict["FileData"]=deecrypt(result[i][3].encode())
 
-                userCard=createUserCard('bank', totalDict)
+                    userCard=createUserCard('note', totalDict)
 
-                cardList.controls[countElementIndex].controls.append(userCard)
+                    cardList.controls[countElementIndex].controls.append(userCard)
 
-            else:
+                else:
 
-                cardList.controls.append(ft.Row())
-                
-                countElementIndex+=1
+                    cardList.controls.append(ft.Row())
+                    
+                    countElementIndex+=1
 
+    except Exception as ex:
 
-    elif (obj.data=="3" or updatePage=='note'):
-
-        result=bd.reqExecute("Select * from Documents")
-
-        cardList.controls.clear()
-        cardList.controls.append(ft.Row([]))
-
-        countElementIndex=0
-
-        totalDict={'Filename': "", 'Format': "", "FileData": ""}
-
-        for i in range (0,len(result)):
-
-            if (len(cardList.controls[countElementIndex].controls)<=4):
-
-                totalDict["Filename"]=deecrypt(result[i][1].encode())
-                totalDict["Format"]=deecrypt(result[i][2].encode())
-                totalDict["FileData"]=deecrypt(result[i][3].encode())
-
-                userCard=createUserCard('note', totalDict)
-
-                cardList.controls[countElementIndex].controls.append(userCard)
-
-            else:
-
-                cardList.controls.append(ft.Row())
-                
-                countElementIndex+=1
+        pass
 
 
 
@@ -331,15 +337,15 @@ def createUserCard(type: str, data: dict[str,typing.Any]) -> ft.Card:
                 password+="•"
 
 
-            if(data["Service Name"].find("https://")!=-1):
+            if(data['Service Name'].find("https://")!=-1):
 
-                    if (data["Service Name"].find("/")!=-1):
+                    if (data['Service Name'].find("/")!=-1):
 
                         if (os.path.exists(f"Icons/userIcons/userCardLogo_{serviceName}.ico")==False):
 
-                            reqData=requests.get("https://"+data["Service Name"].split("https://")[1].split("/")[0]+"/favicon.ico")
+                            reqData=requests.get("https://"+data['Service Name'].split("https://")[1].split("/")[0]+"/favicon.ico")
 
-                            with open(f"Icons/userIcons/userCardLogo_{data["Service Name"].split(".")[0]}.ico", "wb") as iconFile:
+                            with open(f"Icons/userIcons/userCardLogo_{data['Service Name'].split('.')[0]}.ico", "wb") as iconFile:
 
                                 iconFile.write(reqData.content)
 
@@ -347,20 +353,20 @@ def createUserCard(type: str, data: dict[str,typing.Any]) -> ft.Card:
 
                         if (os.path.exists(f"Icons/userIcons/userCardLogo_{serviceName}.ico")==False):
 
-                            reqData=requests.get("https://"+data["Service Name"].split("https://")[1]+"/favicon.ico")
+                            reqData=requests.get("https://"+data['Service Name'].split("https://")[1]+"/favicon.ico")
 
-                            with open(f"Icons/userIcons/userCardLogo_{data["Service Name"].split(".")[0]}.ico", "wb") as iconFile:
+                            with open(f"Icons/userIcons/userCardLogo_{data['Service Name'].split('.')[0]}.ico", "wb") as iconFile:
 
                                 iconFile.write(reqData.content)
 
 
-            elif(data["Service Name"].find("/")!=-1):
+            elif(data['Service Name'].find("/")!=-1):
                     
                     if (os.path.exists(f"Icons/userIcons/userCardLogo_{serviceName}.ico")==False):
 
-                        reqData=requests.get("https://"+data["Service Name"].split("/")[0]+"/favicon.ico")
+                        reqData=requests.get("https://"+data['Service Name'].split("/")[0]+"/favicon.ico")
 
-                        with open(f"Icons/userIcons/userCardLogo_{data["Service Name"].split(".")[0]}.ico", "wb") as iconFile:
+                        with open(f"Icons/userIcons/userCardLogo_{data['Service Name'].split('.')[0]}.ico", "wb") as iconFile:
 
                             iconFile.write(reqData.content)
 
@@ -368,9 +374,9 @@ def createUserCard(type: str, data: dict[str,typing.Any]) -> ft.Card:
                     
                     if (os.path.exists(f"Icons/userIcons/userCardLogo_{serviceName}.ico")==False):
 
-                        reqData=requests.get("https://"+data["Service Name"].split+"/favicon.ico")
+                        reqData=requests.get("https://"+data['Service Name'].split+"/favicon.ico")
 
-                        with open(f"Icons/userIcons/userCardLogo_{data["Service Name"].split(".")[0]}.ico", "wb") as iconFile:
+                        with open(f"Icons/userIcons/userCardLogo_{data['Service Name'].split('.')[0]}.ico", "wb") as iconFile:
 
                             iconFile.write(reqData.content)
 
@@ -381,7 +387,7 @@ def createUserCard(type: str, data: dict[str,typing.Any]) -> ft.Card:
                     
                     ft.Row(width=270, height=40, controls=[
                                                                                                                 
-                        ft.CupertinoListTile(title=ft.Text(serviceName, color=ft.colors.BLACK, font_family="Kufam_SemiBold"), subtitle=ft.Text(data['Service Name'], color=ft.colors.BLACK, size=14), leading=ft.Image(f"Icons\\userIcons\\userCardLogo_{data["Service Name"].split(".")[0]}.ico"), width=210, padding=0),
+                        ft.CupertinoListTile(title=ft.Text(serviceName, color=ft.colors.BLACK, font_family="Kufam_SemiBold"), subtitle=ft.Text(data['Service Name'], color=ft.colors.BLACK, size=14), leading=ft.CircleAvatar(foreground_image_url="https://www.amazon.com/favicon.ico"), width=210, padding=0),
                                                                 
                         ft.Column([
                                                                     

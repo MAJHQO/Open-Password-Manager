@@ -1,1 +1,5 @@
 userData.db
+userErrorLog.log
+/__pycache__
+test.py
+test_2.py
