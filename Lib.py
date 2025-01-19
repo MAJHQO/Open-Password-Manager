@@ -1,25 +1,9 @@
-import string,config,os,flet as ft, typing, logging, datetime,bd, requests
+import string,config as config,os,flet as ft, typing, logging, datetime,bd, requests, guiLib,base64,pyperclip,time
 
 from random import randint
 from cryptography.fernet import Fernet
 
-ferNet=None
 
-if (os.path.exists("information.txt")==True):
-
-        with open("information.txt", "r") as file:
-
-            config.fernet_token=file.readlines()[1]
-
-            ferNet=Fernet(config.fernet_token.encode())
-
-else:
-
-    pKey=Fernet.generate_key()
-
-    ferNet=Fernet(pKey)
-
-    config.fernet_token=pKey
 
 
 
@@ -56,27 +40,31 @@ def createMPassword(self):
 
 
 
-def encryption(data: str, Initialization_Fernet_Token:bool=False) -> bytes:
+def encryption(data: str, InitializationToken:bool=False) -> bytes:
     
     """
     data: string data for encryption
     """
 
     try:
-    
-        key=ferNet.encrypt(data.encode())
 
+        key=base64.urlsafe_b64encode(config.token.encode()[0:32])
+
+        fernetObj=Fernet(key)
+    
+        result=fernetObj.encrypt(data.encode())
+
+        if (InitializationToken==True):
+
+            return result.decode(), config.token.decode()
+    
+        else:
+
+            return result.decode()
+    
     except Exception as ex:
 
         print(ex)
-
-    if (Initialization_Fernet_Token==True):
-
-        return key.decode(), config.fernet_token.decode()
-    
-    else:
-
-        return key.decode()
 
     
 
@@ -88,13 +76,17 @@ def deecrypt(data: bytes)->str:
 
     try:
 
-        data=ferNet.decrypt(data)
+        key=base64.urlsafe_b64encode(config.token.encode()[0:32])
 
+        fernetObj=Fernet(key)
+    
+        result=fernetObj.decrypt(data)
+
+        return result.decode()
+    
     except Exception as ex:
 
         print(ex)
-
-    return data.decode()
 
 
 
@@ -107,17 +99,22 @@ def updateUserCardList(obj, cardList: ft.ListView, updatePage=""):
                     cardList.controls.clear()
                     cardList.controls.append(ft.Row([]))
 
+                    
+                    obj.page.controls[0].controls[2].content.controls[0].content.controls[0].value=" Главная"
+                    obj.page.update()
+
+                    
                     result=bd.reqExecute("Select * from Web_Accounts")
 
                     countElementIndex=0
 
-                    totalDict={'Login': "", 'Password': "", "Service Name": ""}
+                    totalDict={'ID':"",'Login': "", 'Password': "", "Service Name": ""}
 
                     for i in range (0,len(result)):
 
                         if (len(cardList.controls[countElementIndex].controls)<=4):
 
-
+                            totalDict["ID"]=str(result[i][0])
                             totalDict["Login"]=deecrypt(result[i][1].encode())
                             totalDict["Password"]=deecrypt(result[i][2].encode())
                             totalDict["Service Name"]=deecrypt(result[i][3].encode())
@@ -135,17 +132,18 @@ def updateUserCardList(obj, cardList: ft.ListView, updatePage=""):
 
                     result=bd.reqExecute("Select * from Bank_Accounts")
 
-                    totalDict={'Number': "", 'Date': "", "CVC": "", 'Bank Name': "", 'Bank URL': ""}
+                    totalDict={'ID':"",'Number': "", 'Date': "", "CVC": "", 'Bank Name': "", 'Bank URL': ""}
 
                     for i in range (0,len(result)):
 
                         if (len(cardList.controls[countElementIndex].controls)<=4):
 
+                            totalDict["ID"]=str(result[i][0])
                             totalDict["Number"]=deecrypt(result[i][1].encode())
                             totalDict["Date"]=deecrypt(result[i][2].encode())
                             totalDict["CVC"]=deecrypt(result[i][3].encode())
                             totalDict["Bank Name"]=deecrypt(result[i][6].encode())
-                            totalDict["Bank URL"]=deecrypt(result[i][7].encode())
+                            totalDict["Bank URL"]=result[i][7]
 
                             userCard=createUserCard('bank', totalDict)
 
@@ -160,12 +158,13 @@ def updateUserCardList(obj, cardList: ft.ListView, updatePage=""):
                 
                     result=bd.reqExecute("Select * from Documents")
 
-                    totalDict={'Filename': "", 'Format': "", "FileData": ""}
+                    totalDict={'ID':"",'Filename': "", 'Format': "", "FileData": ""}
 
                     for i in range (0,len(result)):
 
                         if (len(cardList.controls[countElementIndex].controls)<=4):
 
+                            totalDict["ID"]=str(result[i][0])
                             totalDict["Filename"]=deecrypt(result[i][1].encode())
                             totalDict["Format"]=deecrypt(result[i][2].encode())
                             totalDict["FileData"]=deecrypt(result[i][3].encode())
@@ -186,17 +185,21 @@ def updateUserCardList(obj, cardList: ft.ListView, updatePage=""):
                 cardList.controls.clear()
                 cardList.controls.append(ft.Row([]))
 
+                obj.page.controls[0].controls[2].content.controls[0].content.controls[0].value=" Аккаунты"
+
+                obj.page.update()
+
                 result=bd.reqExecute("Select * from Web_Accounts")
 
                 countElementIndex=0
 
-                totalDict={'Login': "", 'Password': "", "Service Name": ""}
+                totalDict={'ID':"",'Login': "", 'Password': "", "Service Name": ""}
 
                 for i in range (0,len(result)):
 
                     if (len(cardList.controls[countElementIndex].controls)<=4):
 
-
+                        totalDict["ID"]=str(result[i][0])
                         totalDict["Login"]=deecrypt(result[i][1].encode())
                         totalDict["Password"]=deecrypt(result[i][2].encode())
                         totalDict["Service Name"]=deecrypt(result[i][3].encode())
@@ -219,19 +222,23 @@ def updateUserCardList(obj, cardList: ft.ListView, updatePage=""):
             cardList.controls.clear()
             cardList.controls.append(ft.Row([]))
 
+            obj.page.controls[0].controls[2].content.controls[0].content.controls[0].value=" Банковские данные"
+            obj.page.update()
+
             countElementIndex=0
 
-            totalDict={'Number': "", 'Date': "", "CVC": "", 'Bank Name': "", 'Bank URL': ""}
+            totalDict={'ID':"",'Number': "", 'Date': "", "CVC": "", 'Bank Name': "", 'Bank URL': ""}
 
             for i in range (0,len(result)):
 
                 if (len(cardList.controls[countElementIndex].controls)<=4):
 
+                    totalDict["ID"]=str(result[i][0])
                     totalDict["Number"]=deecrypt(result[i][1].encode())
                     totalDict["Date"]=deecrypt(result[i][2].encode())
                     totalDict["CVC"]=deecrypt(result[i][3].encode())
                     totalDict["Bank Name"]=deecrypt(result[i][6].encode())
-                    totalDict["Bank URL"]=deecrypt(result[i][7].encode())
+                    totalDict["Bank URL"]=result[i][7]
 
                     userCard=createUserCard('bank', totalDict)
 
@@ -251,14 +258,18 @@ def updateUserCardList(obj, cardList: ft.ListView, updatePage=""):
             cardList.controls.clear()
             cardList.controls.append(ft.Row([]))
 
+            obj.page.controls[0].controls[2].content.controls[0].content.controls[0].value=" Заметки"
+            obj.page.update()
+
             countElementIndex=0
 
-            totalDict={'Filename': "", 'Format': "", "FileData": ""}
+            totalDict={'ID':"",'Filename': "", 'Format': "", "FileData": ""}
 
             for i in range (0,len(result)):
 
                 if (len(cardList.controls[countElementIndex].controls)<=4):
 
+                    totalDict["ID"]=str(result[i][0])
                     totalDict["Filename"]=deecrypt(result[i][1].encode())
                     totalDict["Format"]=deecrypt(result[i][2].encode())
                     totalDict["FileData"]=deecrypt(result[i][3].encode())
@@ -286,9 +297,9 @@ def createUserCard(type: str, data: dict[str,typing.Any]) -> ft.Card:
     
     data: 
         
-        - If data type 'web': dict should consist of these key like {'Login', 'Password', 'Service Name' (URL)}
-        - If  data type 'bank': should consist of these key like {'Number', 'Date', 'CVC', 'Bank Name', 'Bank URL'}
-        - If  data type 'note': should consist of these key like {'Filename', 'Format', 'FileData'}
+        - If data type 'web': dict should consist of these key like {'ID',Login', 'Password', 'Service Name' (URL)}
+        - If  data type 'bank': should consist of these key like {'ID','Number', 'Date', 'CVC', 'Bank Name', 'Bank URL'}
+        - If  data type 'note': should consist of these key like {'ID','Filename', 'Format', 'FileData'}
     """
 
 
@@ -299,12 +310,12 @@ def createUserCard(type: str, data: dict[str,typing.Any]) -> ft.Card:
             url=self.control.data.split("OPENLINK:")[1]
 
             if (url.find("https://")==-1):
-            
+
                 self.page.launch_url("https://"+url)
 
             else:
 
-                self.page.launch_url("https://"+url)
+                self.page.launch_url(url)
 
         
         elif(self.control.data.split(":")[0]=="COPY"):
@@ -321,77 +332,41 @@ def createUserCard(type: str, data: dict[str,typing.Any]) -> ft.Card:
 
             login=data['Login']
             password=""
-            serviceName=data['Service Name']
+            serviceURL=data['Service Name']
 
-            if (data['Service Name'] in "www."):
+            if ("www." in data['Service Name']):
 
-                serviceName=data['Service Name'].split("www.")[1]
-                serviceName=serviceName.split(serviceName)[0]
+                serviceURL=data['Service Name'].split("www.")[1]
 
-            else:
+            elif ("https://" in data['Service Name']):
 
-                serviceName=serviceName.split('.')[0]
+                serviceURL=data['Service Name'].split("https://")[1]
+
+            
+            if ("/" in serviceURL):
+
+                serviceURL=serviceURL.split("/")[0]
+
 
             for i in range(0, len(data['Password'])):
 
                 password+="•"
 
+            
+            #serviceIcon=ft.Container(content=ft.Image(url))
 
-            if(data['Service Name'].find("https://")!=-1):
-
-                    if (data['Service Name'].find("/")!=-1):
-
-                        if (os.path.exists(f"Icons/userIcons/userCardLogo_{serviceName}.ico")==False):
-
-                            reqData=requests.get("https://"+data['Service Name'].split("https://")[1].split("/")[0]+"/favicon.ico")
-
-                            with open(f"Icons/userIcons/userCardLogo_{data['Service Name'].split('.')[0]}.ico", "wb") as iconFile:
-
-                                iconFile.write(reqData.content)
-
-                    else:
-
-                        if (os.path.exists(f"Icons/userIcons/userCardLogo_{serviceName}.ico")==False):
-
-                            reqData=requests.get("https://"+data['Service Name'].split("https://")[1]+"/favicon.ico")
-
-                            with open(f"Icons/userIcons/userCardLogo_{data['Service Name'].split('.')[0]}.ico", "wb") as iconFile:
-
-                                iconFile.write(reqData.content)
-
-
-            elif(data['Service Name'].find("/")!=-1):
-                    
-                    if (os.path.exists(f"Icons/userIcons/userCardLogo_{serviceName}.ico")==False):
-
-                        reqData=requests.get("https://"+data['Service Name'].split("/")[0]+"/favicon.ico")
-
-                        with open(f"Icons/userIcons/userCardLogo_{data['Service Name'].split('.')[0]}.ico", "wb") as iconFile:
-
-                            iconFile.write(reqData.content)
-
-            else:
-                    
-                    if (os.path.exists(f"Icons/userIcons/userCardLogo_{serviceName}.ico")==False):
-
-                        reqData=requests.get("https://"+data['Service Name'].split+"/favicon.ico")
-
-                        with open(f"Icons/userIcons/userCardLogo_{data['Service Name'].split('.')[0]}.ico", "wb") as iconFile:
-
-                            iconFile.write(reqData.content)
-
-                                                
-            return ft.Card(content=
+            
+            card=ft.Card(content=
                                                                 
                 ft.Column(width=250, height=300, controls=[
                     
                     ft.Row(width=270, height=40, controls=[
                                                                                                                 
-                        ft.CupertinoListTile(title=ft.Text(serviceName, color=ft.colors.BLACK, font_family="Kufam_SemiBold"), subtitle=ft.Text(data['Service Name'], color=ft.colors.BLACK, size=14), leading=ft.CircleAvatar(foreground_image_url="https://www.amazon.com/favicon.ico"), width=210, padding=0),
+                        ft.CupertinoListTile(title=ft.Text(serviceURL.split(".")[0], color=ft.colors.BLACK, font_family="Kufam_SemiBold"), subtitle=ft.Text(serviceURL, color=ft.colors.BLACK, size=14), leading=ft.CircleAvatar(foreground_image_url="https://"+serviceURL+"/favicon.ico", bgcolor=ft.colors.TRANSPARENT, max_radius=14, radius=14),width=210, padding=0),
                                                                 
                         ft.Column([
                                                                     
-                                ft.PopupMenuButton(icon=ft.icons.SETTINGS, icon_size=16, icon_color=ft.colors.WHITE, padding=0),],
+                                ft.IconButton(icon=ft.icons.SETTINGS, icon_size=16, icon_color=ft.colors.WHITE, padding=0,on_click=guiLib.changeUserCardWeb, data=data['ID']+":"+data['Service Name'])],
                                     horizontal_alignment=ft.CrossAxisAlignment.START, width=30, height=50)],
                                     alignment=ft.MainAxisAlignment.CENTER, vertical_alignment=ft.CrossAxisAlignment.CENTER, spacing=0
                         ), 
@@ -408,7 +383,7 @@ def createUserCard(type: str, data: dict[str,typing.Any]) -> ft.Card:
                                                                                                                     
                         ft.Text(width=150, height=23,value=login,disabled=True, color=ft.colors.BLACK, size=15, text_align=ft.TextAlign.START),
                         ft.Text("", width=30),
-                        ft.IconButton(ft.icons.COPY, icon_size=18, icon_color=ft.colors.BLACK, padding=0, data=data['Login'])
+                        ft.IconButton(ft.icons.COPY, icon_size=18, icon_color=ft.colors.BLACK, padding=0, data="Login:"+data['Login'], on_click=copyInBufferCard)
 
                     ], spacing=0,vertical_alignment=ft.CrossAxisAlignment.CENTER, alignment=ft.MainAxisAlignment.START, width=400), bgcolor=ft.colors.TRANSPARENT, border=ft.border.all(0.7,ft.colors.BLACK), width=227, border_radius=14),
                                                                                                             
@@ -421,22 +396,44 @@ def createUserCard(type: str, data: dict[str,typing.Any]) -> ft.Card:
 
                             ft.Text(width=150, height=28,value=password,disabled=True, color=ft.colors.BLACK, size=15, text_align=ft.TextAlign.START),
                             ft.Text("", width=30),
-                            ft.IconButton(ft.icons.COPY, icon_size=18, icon_color=ft.colors.BLACK, padding=0, data=data['Password'])
+                            ft.IconButton(ft.icons.COPY, icon_size=18, icon_color=ft.colors.BLACK, padding=0, data="Password:"+data['Password'], on_click=copyInBufferCard)
 
                         ], spacing=0, vertical_alignment=ft.CrossAxisAlignment.CENTER, alignment=ft.MainAxisAlignment.START), bgcolor=ft.colors.TRANSPARENT, border=ft.border.all(0.7,ft.colors.BLACK), width=227, border_radius=14),
 
                     ft.Text(""),
 
-                    ft.ElevatedButton("Перейти на сайт",icon=ft.icons.LINK, bgcolor="#CAC8C8", width=180, color=ft.colors.BLACK, data="OPENLINK:"+data['Service Name'], on_click=openLinkButton)
+                    ft.ElevatedButton("Перейти на сайт",icon=ft.icons.LINK, bgcolor="#CAC8C8", width=180, color=ft.colors.BLACK, data="OPENLINK:"+serviceURL, on_click=openLinkButton)
 
                                                                                                             
                     ], horizontal_alignment=ft.CrossAxisAlignment.CENTER), color="#D9D9D9", shadow_color=ft.colors.BLACK,shape=ft.RoundedRectangleBorder(14)
                 
-        )
+            )
     
+
+            #print (requests.get(f"https://{serviceURL}/favicon.ico").content.find("404 Not Found"))
+
+            try:
+        
+                if (str(requests.get(f"https://{serviceURL}/favicon.ico").content).find("404 Not Found")==-1):
+
+                    return card
+                
+                else:
+
+                    card.content.controls[0].controls[0].leading=ft.CircleAvatar(foreground_image_url="https://i.pinimg.com/736x/94/9b/4a/949b4a6abbc47da3905dd3ce46cac226.jpg", bgcolor=ft.colors.TRANSPARENT, max_radius=20,radius=20)
+
+                    return card
+                
+            except Exception as ex:
+
+                card.content.controls[0].controls[0].leading=ft.CircleAvatar(foreground_image_url="https://i.pinimg.com/736x/94/9b/4a/949b4a6abbc47da3905dd3ce46cac226.jpg", bgcolor=ft.colors.TRANSPARENT, max_radius=20,radius=20)
+
+                return card
+
         else:
 
             logging.error(f"[{datetime.datetime.now()}] :: There is not one or more dictation keys")
+
 
 
     elif (type.lower()=='bank'):
@@ -487,11 +484,11 @@ def createUserCard(type: str, data: dict[str,typing.Any]) -> ft.Card:
                             
                             ft.Row(width=270, height=40, controls=[
                                                                                                                         
-                                ft.CupertinoListTile(title=ft.Text(data['Bank Name'], color=ft.colors.BLACK, font_family="Kufam_SemiBold"), leading=ft.Image("Icons\\MastercardLogo.png", border_radius=40), width=210, padding=0),
+                                ft.CupertinoListTile(title=ft.Text(data['Bank Name'], color=ft.colors.BLACK, font_family="Kufam_SemiBold"), leading=ft.Image("Icons\MastercardLogo.png", border_radius=14), width=210, padding=0),
                                                                         
                                 ft.Column([
                                                                             
-                                        ft.PopupMenuButton(icon=ft.icons.SETTINGS, icon_size=16, icon_color=ft.colors.WHITE, padding=0)],
+                                        ft.IconButton(icon=ft.icons.SETTINGS, icon_size=16, icon_color=ft.colors.WHITE, padding=0, data=data['ID']+":"+data['Number'], on_click=guiLib.changeUserCardBank)],
                                             horizontal_alignment=ft.CrossAxisAlignment.START, width=30, height=50)],
                                             alignment=ft.MainAxisAlignment.CENTER, vertical_alignment=ft.CrossAxisAlignment.CENTER, spacing=0
                                 ), 
@@ -506,7 +503,7 @@ def createUserCard(type: str, data: dict[str,typing.Any]) -> ft.Card:
                                                                                                                                 
                                     ft.Text(width=170, height=38,value=number,disabled=True, color=ft.colors.BLACK, size=15, text_align=ft.TextAlign.CENTER, font_family="Kufam_SemiBold"),
                                     ft.Text("", width=20),
-                                    ft.IconButton(ft.icons.COPY, icon_size=18, icon_color=ft.colors.BLACK, padding=0, data="COPY:"+data['Number'])
+                                    ft.IconButton(ft.icons.COPY, icon_size=18, icon_color=ft.colors.BLACK, padding=0, data="Number:"+data['Number'], on_click=copyInBufferCard)
 
                                 ], spacing=0,vertical_alignment=ft.CrossAxisAlignment.CENTER, alignment=ft.MainAxisAlignment.START), bgcolor=ft.colors.TRANSPARENT, border=ft.border.all(0.7,ft.colors.BLACK), width=227, border_radius=14, alignment=ft.Alignment(0.0, 0.0)),
                                                                                                                     
@@ -519,13 +516,13 @@ def createUserCard(type: str, data: dict[str,typing.Any]) -> ft.Card:
 
                                     ft.Text(value=data['Date'],disabled=True, color=ft.colors.BLACK, size=15, text_align=ft.TextAlign.CENTER, font_family="Kufam_SemiBold"),
                                     ft.Text("", width=4),
-                                    ft.IconButton(ft.icons.COPY, icon_size=18, icon_color=ft.colors.BLACK, padding=0,data="COPY:"+data['Date']),
+                                    ft.IconButton(ft.icons.COPY, icon_size=18, icon_color=ft.colors.BLACK, padding=0,data="OverDate:"+data['Date'], on_click=copyInBufferCard),
 
                                     ft.Text("", width=40),
 
                                     ft.Text(cvcCode,disabled=True, color=ft.colors.BLACK, size=15, text_align=ft.TextAlign.CENTER),
                                     ft.Text("", width=4),
-                                    ft.IconButton(ft.icons.COPY, icon_size=18, icon_color=ft.colors.BLACK, padding=0, data="COPY:"+data['CVC'])
+                                    ft.IconButton(ft.icons.COPY, icon_size=18, icon_color=ft.colors.BLACK, padding=0, data="CVC:"+data['CVC'], on_click=copyInBufferCard)
 
                                 ], spacing=0, vertical_alignment=ft.CrossAxisAlignment.CENTER, alignment=ft.MainAxisAlignment.START), bgcolor=ft.colors.TRANSPARENT, width=227),
 
@@ -543,15 +540,15 @@ def createUserCard(type: str, data: dict[str,typing.Any]) -> ft.Card:
             
             if (data['Number'][1:2]=="2"):
 
-                card.content.controls[0].controls[0].leading=ft.Image("Icons\MirLogo.png", border_radius=40)
+                card.content.controls[0].controls[0].leading=ft.Image("Icons\MirLogo.png",border_radius=14)
 
             elif (data['Number'][1:2]=="4"):
 
-                card.content.controls[0].controls[0].leading=ft.Image("Icons\VisaLogo.png", border_radius=40)
+                card.content.controls[0].controls[0].leading=ft.Image("Icons\VisaLogo.png",border_radius=14)
 
             elif(data['Number'][1:2]=="5"):
 
-                card.content.controls[0].controls[0].leading=ft.Image("Icons\MastercardLogo.png", border_radius=40)
+                card.content.controls[0].controls[0].leading=ft.Image("Icons\MastercardLogo.png",border_radius=14)
 
             
             return card
@@ -569,39 +566,78 @@ def createUserCard(type: str, data: dict[str,typing.Any]) -> ft.Card:
                 
                 filedata=data["FileData"]
                 
-                return ft.Card(content=
-                                                                
-                    ft.Column(width=250, height=300, controls=[
-                        
-                        ft.Row(width=270, height=40, controls=[
-
-                            ft.Text("", width=10),
-
-                            ft.Image("Icons\\Notes.jpg", border_radius=100, width=31,height=31),
-
-                            ft.Text("", width=45),
-                                                                                                                    
-                            ft.Text(data["Filename"], size=17, color=ft.colors.BLACK, width=75, font_family="Kufam_SemiBold"),
-
-                            ft.Text("", width=40),
+                
+                if (data['Format'] in ["docx", 'rtf']):
+                
+                    return ft.Card(content=
                                                                     
-                            ft.PopupMenuButton(icon=ft.icons.SETTINGS, icon_size=20, icon_color=ft.colors.WHITE, padding=0)
+                        ft.Column(width=250, height=300, controls=[
                             
-                            ], alignment=ft.MainAxisAlignment.START, vertical_alignment=ft.CrossAxisAlignment.CENTER, spacing=0
-                            ), 
+                            ft.Row(width=270, height=40, controls=[
 
-                        ft.Divider(),
+                                ft.Text("", width=10),
 
-                        #ft.Text(""),
-                                                                                            
-                        ft.Container(content=ft.Text(filedata), width=210, height=160, padding=0, bgcolor=ft.colors.TRANSPARENT),
+                                ft.CircleAvatar(foreground_image_src="Icons\\Notes.jpg", max_radius=14,radius=14),
 
-                        ft.Row([ft.IconButton(ft.icons.COPY, icon_size=24, icon_color=ft.colors.BLACK, padding=0, data=data["FileData"])], alignment=ft.MainAxisAlignment.CENTER)
+                                ft.Text("", width=45),
+                                                                                                                        
+                                ft.Text(data["Filename"], size=15, color=ft.colors.BLACK, width=75, max_lines=1, font_family="Kufam_SemiBold"),
 
-                                                                                                                
-                        ], horizontal_alignment=ft.CrossAxisAlignment.START), color="#D9D9D9", shadow_color=ft.colors.BLACK,shape=ft.RoundedRectangleBorder(14)
-                    
-            )
+                                ft.Text("", width=40),
+                                                                        
+                                ft.PopupMenuButton(icon=ft.icons.SETTINGS, icon_size=20, icon_color=ft.colors.WHITE, padding=0, data=data['ID']+":"+data['Filename'])
+                                
+                                ], alignment=ft.MainAxisAlignment.START, vertical_alignment=ft.CrossAxisAlignment.CENTER, spacing=0
+                                ), 
+
+                            ft.Divider(),
+
+                            #ft.Text(""),
+                                                                                                
+                            ft.Container(content=ft.Image("Image\WordFileIcon.png"), width=230, height=160, padding=0, bgcolor=ft.colors.TRANSPARENT),
+
+                            ft.Row([ft.IconButton(ft.icons.COPY, icon_size=24, icon_color=ft.colors.BLACK, padding=0, data=data["FileData"], on_click=copyInBufferCard)], alignment=ft.MainAxisAlignment.CENTER)
+
+                                                                                                                    
+                            ], horizontal_alignment=ft.CrossAxisAlignment.START), color="#D9D9D9", shadow_color=ft.colors.BLACK,shape=ft.RoundedRectangleBorder(14)
+                        
+                )
+
+                else:
+
+                    return ft.Card(content=
+                                                                    
+                        ft.Column(width=250, height=300, controls=[
+                            
+                            ft.Row(width=270, height=40, controls=[
+
+                                ft.Text("", width=10),
+
+                                ft.CircleAvatar(foreground_image_src="Icons\\Notes.jpg", max_radius=14,radius=14),
+
+                                ft.Text("", width=45),
+                                                                                                                        
+                                ft.Text(data["Filename"], size=15, color=ft.colors.BLACK, width=75, max_lines=1, font_family="Kufam_SemiBold"),
+
+                                ft.Text("", width=40),
+                                                                        
+                                ft.PopupMenuButton(icon=ft.icons.SETTINGS, icon_size=20, icon_color=ft.colors.WHITE, padding=0)
+                                
+                                ], alignment=ft.MainAxisAlignment.START, vertical_alignment=ft.CrossAxisAlignment.CENTER, spacing=0
+                                ), 
+
+                            ft.Divider(),
+
+                            #ft.Text(""),
+                                                                                                
+                            ft.Container(content=ft.Image("Image\\NotesFileIcon.png"), width=230, height=160, padding=0, bgcolor=ft.colors.TRANSPARENT),
+
+                            ft.Row([ft.IconButton(ft.icons.COPY, icon_size=24, icon_color=ft.colors.BLACK, padding=0, data=data["FileData"])], alignment=ft.MainAxisAlignment.CENTER)
+
+                                                                                                                    
+                            ], horizontal_alignment=ft.CrossAxisAlignment.START), color="#D9D9D9", shadow_color=ft.colors.BLACK,shape=ft.RoundedRectangleBorder(14)
+                        
+                )
 
             
         else:
@@ -628,3 +664,68 @@ def strCheckOnEnglish(text:str):
             check=False
 
     return check
+
+
+def copyInBufferCard(self):
+
+    if (self.control.data.split(":")[0]=="Number"):
+
+        pyperclip.copy(self.control.data.split(":")[1])
+
+        self.control.icon_color=ft.colors.GREEN_300
+        self.page.update()
+
+        time.sleep(1)
+
+        self.control.icon_color=ft.colors.BLACK
+        self.page.update()
+
+        
+
+    elif (self.control.data.split(":")[0]=="OverDate"):
+
+        pyperclip.copy(self.control.data.split(":")[1])
+
+        self.control.icon_color=ft.colors.GREEN_300
+        self.page.update()
+
+        time.sleep(1)
+
+        self.control.icon_color=ft.colors.BLACK
+        self.page.update()
+
+    elif (self.control.data.split(":")[0]=="CVC"):
+
+        pyperclip.copy(self.control.data.split(":")[1])
+
+        self.control.icon_color=ft.colors.GREEN_300
+        self.page.update()
+
+        time.sleep(1)
+
+        self.control.icon_color=ft.colors.BLACK
+        self.page.update()
+
+    elif (self.control.data.split(":")[0]=="Login"):
+
+        pyperclip.copy(self.control.data.split(":")[1])
+
+        self.control.icon_color=ft.colors.GREEN_300
+        self.page.update()
+
+        time.sleep(1)
+
+        self.control.icon_color=ft.colors.BLACK
+        self.page.update()
+
+    elif (self.control.data.split(":")[0]=="Password"):
+
+        pyperclip.copy(self.control.data.split(":")[1])
+
+        self.control.icon_color=ft.colors.GREEN_300
+        self.page.update()
+
+        time.sleep(1)
+
+        self.control.icon_color=ft.colors.BLACK
+        self.page.update()

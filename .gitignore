@@ -1,5 +1,7 @@
 userData.db
 userErrorLog.log
 /__pycache__
+/Data
 test.py
 test_2.py
+testingKeys.ipynb

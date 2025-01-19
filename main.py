@@ -47,7 +47,7 @@ def main_menu(page:ft.Page):
         
             ]),
         
-        alignment=ft.Alignment(-1.0,0.0), bgcolor="#D9D9D9", width=220, height=500)
+        alignment=ft.Alignment(-1.0,0.0), bgcolor="#D9D9D9", width=220, height=900)
     
     topElementContainer=ft.Container(content=
                                      
@@ -100,6 +100,7 @@ def main_menu(page:ft.Page):
                 if (len(cardListView.controls[countElementIndex].controls)<=4):
 
 
+                        totalDict["ID"]=Lib.deecrypt(result[i][0].encode())
                         totalDict["Login"]=Lib.deecrypt(result[i][1].encode())
                         totalDict["Password"]=Lib.deecrypt(result[i][2].encode())
                         totalDict["Service Name"]=Lib.deecrypt(result[i][3].encode())
@@ -123,6 +124,7 @@ def main_menu(page:ft.Page):
 
                     if (len(cardListView.controls[countElementIndex].controls)<=4):
 
+                        totalDict["ID"]=Lib.deecrypt(result[i][0].encode())
                         totalDict["Number"]=Lib.deecrypt(result[i][1].encode())
                         totalDict["Date"]=Lib.deecrypt(result[i][2].encode())
                         totalDict["CVC"]=Lib.deecrypt(result[i][3].encode())
@@ -148,6 +150,7 @@ def main_menu(page:ft.Page):
 
                     if (len(cardListView.controls[countElementIndex].controls)<=4):
 
+                        totalDict["ID"]=Lib.deecrypt(result[i][0].encode())
                         totalDict["Filename"]=Lib.deecrypt(result[i][1].encode())
                         totalDict["Format"]=Lib.deecrypt(result[i][2].encode())
                         totalDict["FileData"]=Lib.deecrypt(result[i][3].encode())

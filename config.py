@@ -1,1 +1,1 @@
-fernet_token:bytes=None
+token:str=None

@@ -1,0 +1,15 @@
+INFO:flet:Assets path configured: E:\PROJECT\Python\Kursovaya\Git\Open-Password-Manager\assets
+INFO:flet:Starting up TCP server on localhost:57052
+INFO:flet:Flet app has started...
+INFO:flet:App URL: tcp://localhost:57052
+INFO:flet_desktop:Starting Flet View app...
+INFO:flet_desktop:Looking for Flet executable at: c:\Users\user\AppData\Local\Programs\Python\Python311\Lib\site-packages\flet_desktop\app\flet\flet.exe
+INFO:flet_desktop:Flet View found in: c:\Users\user\AppData\Local\Programs\Python\Python311\Lib\site-packages\flet_desktop\app\flet\flet.exe
+INFO:flet:App session started
+INFO:root:[2025-01-19 19:37:17.248067] :: Connection to database was successful
+INFO:root:[2025-01-19 19:37:17.248067] :: Request execute was successful
+ERROR:root:[2025-01-19 19:37:17.249069] :: Connection to database was not succussful, REASON: 'int' object has no attribute 'encode'
+INFO:root:[2025-01-19 19:37:18.610556] :: Connection to database was successful
+INFO:root:[2025-01-19 19:37:18.611557] :: Request execute was successful
+INFO:root:[2025-01-19 19:37:20.611897] :: Connection to database was successful
+INFO:root:[2025-01-19 19:37:20.611897] :: Request execute was successful

@@ -5,7 +5,7 @@ def connnetctionToDatabase():
 
     try:
 
-        connec=sq.Connection("userData.db", check_same_thread=False)
+        connec=sq.Connection(".\\userData.db", check_same_thread=False)
 
         logging.info(f"[{datetime.datetime.now()}] :: Connection to database was successful")
 
@@ -16,30 +16,33 @@ def connnetctionToDatabase():
         logging.error(f"[{datetime.datetime.now()}] :: Connection to database was not successful, REASON: {ex}")
 
 
-connection=connnetctionToDatabase()
-
-
 def reqExecute(request: str):
 
     try:
 
+        connection=connnetctionToDatabase()
+
+        
         cursor=connection.cursor()
 
         cursor.execute(request)
 
         connection.commit()
 
+        res=cursor.fetchall()
+
+        connection.close()
+
+
         logging.info(f"[{datetime.datetime.now()}] :: Request execute was successful")
 
         print("[LOG]: Request OK")
 
-        return cursor.fetchall()
+        return res
 
     except Exception as ex:
         
         logging.error(f"[{datetime.datetime.now()}] :: Request execute was not successful, REASON: {ex}")
-
-        print("[ERROR]: Request error: "+str(ex))
 
 
 # reqExecute("Drop table Documents")
