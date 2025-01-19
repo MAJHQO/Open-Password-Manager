@@ -1,5 +1,5 @@
 import flet as ft, sqlite3 as sq
-import logging, bd, guiLib as gLib, Lib, pywin32_system32
+import logging, bd, guiLib as gLib, Lib
 
 
 

@@ -1,4 +1,4 @@
-import flet as ft, bd,time, Lib, shutil, datetime, os, keyboard
+import flet as ft, bd,time, Lib, datetime, os, keyboard
 
 from main import logging
 from flet import FilePickerResultEvent

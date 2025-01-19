@@ -1,4 +1,4 @@
-import string,config as config,os,flet as ft, typing, logging, datetime,bd, requests, guiLib,base64,pyperclip,time
+import string,config as config,flet as ft, typing, logging, datetime,bd, requests, guiLib,base64,pyperclip,time
 
 from random import randint
 from cryptography.fernet import Fernet

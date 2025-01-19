@@ -1,4 +1,3 @@
-import cryptography.hazmat
 import cryptography.utils
 import flet as ft, guiLib as gLib, config
 import main, time, logging, datetime,bd
